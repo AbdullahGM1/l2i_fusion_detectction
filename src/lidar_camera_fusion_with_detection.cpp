@@ -119,25 +119,32 @@ private:
 
     void projectPointCloudToImage(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud)
     {
+
+        //Check if the image avilable 
         if (current_image_.empty()) {
             RCLCPP_WARN(this->get_logger(), "No image available for projection.");
             return;
         }
-
+        
+        //Iterate Through Each Point in the Point Cloud
         for (const auto& point : cloud->points) {
-            cv::Point3d pt_cv(point.x, point.y, point.z);
-            if (pt_cv.x <= 0.0) continue;
+            cv::Point3d pt_cv(point.x, point.y, point.z); //Convert 3D Point to OpenCV Format
+            if (pt_cv.z <= 0.0) continue;
 
-            cv::Point2d uv = camera_model_->project3dToPixel(pt_cv);
+            // Project 3D point to 2D image plane
+            cv::Point2d uv = camera_model_->project3dToPixel(pt_cv); //resulting in a 2D pixel coordinate (uv.x, uv.y).
 
+            //Check if the Point is Inside Any Bounding Box
             bool within_bbox = false;
             for (const auto& detection : current_detections_) {
                 auto& bbox = detection.bbox;
+
                 float x_min = bbox.center.position.x - bbox.size.x / 2;
                 float y_min = bbox.center.position.y - bbox.size.y / 2;
                 float x_max = bbox.center.position.x + bbox.size.x / 2;
                 float y_max = bbox.center.position.y + bbox.size.y / 2;
 
+                // Check if the projected point lies inside the bounding box
                 if (uv.x >= x_min && uv.x <= x_max && uv.y >= y_min && uv.y <= y_max) {
                     within_bbox = true;
                     break;
