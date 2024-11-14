@@ -18,7 +18,6 @@
 #include <memory>
 #include <geometry_msgs/msg/pose_array.hpp>
 #include <yolov8_msgs/msg/detection_array.hpp>
-#include <map>
 
 class LidarCameraFusionNode : public rclcpp::Node
 {
@@ -51,18 +50,16 @@ public:
             "/yolo/tracking", rclcpp::QoS(10), std::bind(&LidarCameraFusionNode::detectionCallback, this, std::placeholders::_1));
 
         image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("/image_lidar", 10);
-        pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/detected_objectpose", 10);
+        pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/detected_object_position", 10);
     }
 
 private:
-    // Subscription and Publishers
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_sub_;
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
     rclcpp::Subscription<yolov8_msgs::msg::DetectionArray>::SharedPtr detection_sub_;
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
     rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_pub_;
-    std::map<int, rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr> pointcloud_pubs_;
 
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
@@ -79,31 +76,35 @@ private:
     int image_height_;
 
     bool loadConfig(const std::string &config_file)
-    {
-        try {
-            YAML::Node config = YAML::LoadFile(config_file);
-            auto matrix = config["transformation_matrix"].as<std::vector<std::vector<double>>>();
-            for (size_t i = 0; i < 4; ++i) {
-                for (size_t j = 0; j < 4; ++j) {
-                    transformation_matrix_(i, j) = static_cast<float>(matrix[i][j]);
-                }
+{
+    try {
+        YAML::Node config = YAML::LoadFile(config_file);
+        auto matrix = config["transformation_matrix"].as<std::vector<std::vector<double>>>();
+        
+        std::cout << "Transformation Matrix:" << std::endl;
+        for (size_t i = 0; i < 4; ++i) {
+            for (size_t j = 0; j < 4; ++j) {
+                transformation_matrix_(i, j) = static_cast<float>(matrix[i][j]);
+                std::cout << transformation_matrix_(i, j) << " ";
             }
-            min_depth_ = config["depth_range"]["min"].as<double>();
-            max_depth_ = config["depth_range"]["max"].as<double>();
-            RCLCPP_INFO(this->get_logger(), "Configuration loaded successfully.");
-            return true;
-        } catch (const std::exception &e) {
-            RCLCPP_ERROR(this->get_logger(), "Error loading config file: %s", e.what());
-            return false;
+            std::cout << std::endl;
         }
-    }
 
-    void setupPointCloudPublishers(int count) {
-        for (int i = 0; i < count; ++i) {
-            std::string topic_name = "/detected_object_pointcloud/BB" + std::to_string(i+1);
-            pointcloud_pubs_[i] = this->create_publisher<sensor_msgs::msg::PointCloud2>(topic_name, 10);
-        }
+        min_depth_ = config["depth_range"]["min"].as<double>();
+        max_depth_ = config["depth_range"]["max"].as<double>();
+
+        std::cout << "Minimum Depth: " << min_depth_ << std::endl;
+        std::cout << "Maximum Depth: " << max_depth_ << std::endl;
+
+        RCLCPP_INFO(this->get_logger(), "Configuration loaded successfully.");
+        return true;
+    } catch (const std::exception &e) {
+        RCLCPP_ERROR(this->get_logger(), "Error loading config file: %s", e.what());
+        std::cout << "Error loading config file: " << e.what() << std::endl;
+        return false;
     }
+}
+
 
     void cameraInfoCallback(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
     {
@@ -127,7 +128,6 @@ private:
     void detectionCallback(const yolov8_msgs::msg::DetectionArray::SharedPtr msg)
     {
         current_detections_ = msg->detections;
-        setupPointCloudPublishers(current_detections_.size());
     }
 
     void pointCloudCallback(const sensor_msgs::msg::PointCloud2::SharedPtr msg)
@@ -180,16 +180,24 @@ private:
 
         for (auto &[id, points] : bbox_points) {
             if (!points.empty()) {
-                pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+                double sum_x = 0, sum_y = 0, sum_z = 0;
                 for (auto &p : points) {
-                    cloud->push_back(p);
+                    sum_x += p.x;
+                    sum_y += p.y;
+                    sum_z += p.z;
                 }
-                sensor_msgs::msg::PointCloud2 output_cloud;
-                pcl::toROSMsg(*cloud, output_cloud);
-                output_cloud.header.stamp = msg->header.stamp;
-                output_cloud.header.frame_id = msg->header.frame_id;  // Use the same frame as the input cloud
+                double avg_x = sum_x / points.size();
+                double avg_y = sum_y / points.size();
+                double avg_z = sum_z / points.size();
 
-                pointcloud_pubs_[id]->publish(output_cloud);
+                geometry_msgs::msg::Pose pose;
+                pose.position.x = avg_x;
+                pose.position.y = avg_y;
+                pose.position.z = avg_z;
+                pose.orientation.w = 1.0; // No rotation information
+                pose_array.poses.push_back(pose);
+
+                RCLCPP_INFO(this->get_logger(), "BB%d Average pose: X = %f, Y = %f, Z = %f", id+1, avg_x, avg_y, avg_z);
             }
         }
 
