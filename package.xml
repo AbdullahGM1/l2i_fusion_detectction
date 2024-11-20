@@ -19,6 +19,9 @@
   <depend>cv_bridge</depend>
   <depend>image_geometry</depend>
   <depend>opencv2</depend>
+  <depend>yolov8_msgs</depend>
+  <depend>geometry_msgs</depend>
+  
 
   <export>
     <build_type>ament_cmake</build_type>
