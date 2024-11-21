@@ -55,6 +55,8 @@ public:
     // Create a publisher for the detected object Pose
     pose_publisher_ = this->create_publisher<geometry_msgs::msg::PoseArray>("/detected_object_pose", 10);
 
+    // Create a publisher for detected object point clouds
+    object_point_cloud_publisher_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("/detected_object_point_cloud", 10);
   }
 
 private:
@@ -145,14 +147,6 @@ private:
     filtered_msg.header.stamp = msg->header.stamp;
     filtered_msg.header.frame_id = msg->header.frame_id;
 
-    // Print the first 5 points from the filtered data for verification
-    // RCLCPP_INFO(this->get_logger(), "First 5 points from filtered data:");
-    // for (size_t i = 0; i < cloud_filtered->points.size() && i < 5; ++i)
-    // {
-    //     const auto& point = cloud_filtered->points[i];
-    //     RCLCPP_INFO(this->get_logger(), "Filtered Point %zu: x=%f, y=%f, z=%f", i+1, point.x, point.y, point.z);
-    // }
-
     // Check if a valid transformation exists and apply it to the filtered point cloud
     sensor_msgs::msg::PointCloud2 cloud_transformed;
     if (!tf_buffer_.canTransform(camera_frame_, filtered_msg.header.frame_id, filtered_msg.header.stamp, tf2::durationFromSec(1.0)))
@@ -167,15 +161,13 @@ private:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_camera_frame(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::fromROSMsg(cloud_transformed, *cloud_camera_frame);
 
-    // Print the first 5 points from the transformed data for verification
-    // RCLCPP_INFO(this->get_logger(), "First 5 points after transformation:");
-    // for (size_t i = 0; i < cloud_camera_frame->points.size() && i < 5; ++i)
-    // {
-    //     const auto& point = cloud_camera_frame->points[i];
-    //     RCLCPP_INFO(this->get_logger(), "Transformed Point %zu: x=%f, y=%f, z=%f", i+1, point.x, point.y, point.z);
-    // }
-
     projected_points_.clear();  // Clear previous points
+
+    // Create a vector to store point clouds for each detected object
+    std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> object_point_clouds;
+    for (const auto& bbox : bounding_boxes) {
+        object_point_clouds.push_back(pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>()));
+    }
 
     for (size_t i = 0; i < cloud_camera_frame->points.size(); ++i) {
         const auto& point = cloud_camera_frame->points[i];
@@ -186,15 +178,42 @@ private:
             uv.x = image_width_ - uv.x;  // Mirror the x-coordinate
 
              // Check if the point is within any bounding box
-            for (auto& bbox : bounding_boxes) {
+            for (size_t bbox_idx = 0; bbox_idx < bounding_boxes.size(); ++bbox_idx) {
+                auto& bbox = bounding_boxes[bbox_idx];
                 if (bbox.valid && uv.x >= bbox.x_min && uv.x <= bbox.x_max && uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
                     projected_points_.push_back(uv);  // Store valid points
                     bbox.sum_x += point.x;
                     bbox.sum_y += point.y;
                     bbox.sum_z += point.z;
                     bbox.count++;  // Increment count of points within this bbox
+                    
+                    // Add point to object-specific point cloud
+                    object_point_clouds[bbox_idx]->points.push_back(point);
                 }
             }
+        }
+    }
+
+    // Publish object point clouds
+    for (size_t bbox_idx = 0; bbox_idx < bounding_boxes.size(); ++bbox_idx) {
+        const auto& bbox = bounding_boxes[bbox_idx];
+        auto& object_cloud = object_point_clouds[bbox_idx];
+        
+        if (!object_cloud->points.empty()) {
+            object_cloud->width = object_cloud->points.size();
+            object_cloud->height = 1;
+            object_cloud->is_dense = true;
+
+            // Convert PCL point cloud to ROS message
+            sensor_msgs::msg::PointCloud2 object_cloud_msg;
+            pcl::toROSMsg(*object_cloud, object_cloud_msg);
+            
+            // Set the header
+            object_cloud_msg.header.stamp = msg->header.stamp;
+            object_cloud_msg.header.frame_id = camera_frame_;
+
+            // Publish the point cloud
+            object_point_cloud_publisher_->publish(object_cloud_msg);
         }
     }
 
@@ -218,8 +237,6 @@ private:
 
             // Add the pose to the array
             pose_array.poses.push_back(pose);
-
-            // RCLCPP_INFO(this->get_logger(), "BoundingBox ID %d Avg Pose: x=%f, y=%f, z=%f", bbox.id, avg_x, avg_y, avg_z);
         }
     }
 
@@ -233,6 +250,7 @@ private:
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
   rclcpp::Subscription<yolov8_msgs::msg::DetectionArray>::SharedPtr detection_subscriber_;
   rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr object_point_cloud_publisher_; // New publisher
 
   tf2_ros::Buffer tf_buffer_;
   tf2_ros::TransformListener tf_listener_;
