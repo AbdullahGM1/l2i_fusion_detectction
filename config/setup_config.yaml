@@ -1,9 +1,0 @@
-transformation_matrix:
-  - [0, -1, 0, 0.1]
-  - [0, 0, -1, 0]
-  - [1, 0, 0, 0]
-  - [0, 0, 0, 1]
-
-depth_range:
-  min: 0.5  # Minimum depth
-  max: 10   # Maximum depth
