@@ -22,7 +22,6 @@ find_package(pcl_conversions REQUIRED)
 find_package(yolov8_msgs REQUIRED)
 find_package(tf2_sensor_msgs REQUIRED)
 
-
 # Include directories
 include_directories(
   include
@@ -39,7 +38,6 @@ ament_target_dependencies(lidar_camera_fusion_with_detection
   sensor_msgs
   tf2_ros
   tf2_eigen
-  Eigen3
   tf2_geometry_msgs
   geometry_msgs
   cv_bridge
@@ -51,7 +49,7 @@ ament_target_dependencies(lidar_camera_fusion_with_detection
 
 target_link_libraries(lidar_camera_fusion_with_detection
   ${OpenCV_LIBRARIES}
-  ${Eigen_LIBRARIES}
+  ${Eigen3_LIBRARIES}
   ${tf2_eigen_LIBRARIES}
 )
 
@@ -59,6 +57,11 @@ target_link_libraries(lidar_camera_fusion_with_detection
 install(TARGETS
   lidar_camera_fusion_with_detection
   DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install launch files
+install(DIRECTORY launch/
+  DESTINATION share/${PROJECT_NAME}/launch
 )
 
 # Install the configuration files
