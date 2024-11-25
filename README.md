@@ -73,7 +73,7 @@ sudo apt-get install libpcl-dev libopencv-dev
 ### Clone the Repository
 ```bash
 cd ~/ros2_ws/src
-git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection.git
+git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection_cpp.git
 ```
 ### Build the Package:
 Navigate back to your ROS2 workspace root and use ``colcon`` to build the package:
