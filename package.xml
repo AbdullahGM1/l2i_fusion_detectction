@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>ros2_lidar_camera_fusion_with_detection_cpp</name>
-  <version>0.0.1</version>
+  <version>1.0.0</version>
   <description>A ROS2 package for lidar and camera fusion with detection, using C++.</description>
 
-  <maintainer email="your_email@example.com">Your Name</maintainer>
-  <license>BSD</license>
+  <maintainer email="agm.musalami@gmail.com">AbdullahGM1</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
