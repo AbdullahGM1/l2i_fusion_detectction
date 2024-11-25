@@ -28,11 +28,10 @@ Previously, I created a similar package in Python: [ros2_lidar_camera_fusion_wit
 <p align="center">
   <img src="images/1.png" alt="Lidar-Camera Fusion Example 1" width="500"/>
   <img src="images/2.png" alt="Lidar-Camera Fusion Example 2" width="500"/>
-   <img src="images/3.png" alt="Lidar-Camera Fusion Example 3" width="500"/>
 </p>
 
 <p align="center">
-  <img src="images/Camera&Lidar_Fusion.gif" alt="Lidar-Camera Fusion in Action gif" width="600"/>
+  <img src="images/Camera&Lidar_Fusion.gif" alt="Lidar-Camera Fusion in Action gif" width="500"/>
 </p>
 
 <p align="center">
