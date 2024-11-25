@@ -53,13 +53,14 @@ Previously, I created a similar package in Python: [ros2_lidar_camera_fusion_wit
 - **Interactive Visualization**: Offers real-time visual feedback by projecting lidar points of the detected objects onto camera images, enhancing the visual assessment of alignment and accuracy in the sensor fusion process.
 - **Detected Object Point Cloud Streaming**: Publishes the points within bounding boxes (BB) as distinct point clouds for each detected object.
 - **Multi-Object Detection and Localization**: Simultaneously detects and estimates positions for multiple detected objects in real-time.
+- **ROS2 Integration**: Fully compatible with ROS2 for seamless integration in robotics applications.
 ---
 
 ## Installation
 
 ### Prerequisites
 - **ROS2 Humble**: Ensure you have ROS2 Humble installed on your machine. [Installation Guide](https://docs.ros.org/en/humble/Installation.html)
-- **YOLOvX**: Follow the instructions to set up YOLOvX in ROS2 for object detection. [Installation Guide](https://github.com/mgonzs13/yolov8_ros) 
+- **yolovX_ros**: Follow the instructions to set up YOLOvX in ROS2 for object detection. [Installation Guide](https://github.com/mgonzs13/yolov8_ros) 
 
 ### Clone the Repository
 ```bash
