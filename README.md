@@ -60,23 +60,31 @@ Previously, I created a similar package in Python: [ros2_lidar_camera_fusion_wit
 
 ### Prerequisites
 - **ROS2 Humble**: Ensure you have ROS2 Humble installed on your machine. [Installation Guide](https://docs.ros.org/en/humble/Installation.html)
-- **yolovX_ros**: Follow the instructions to set up YOLOvX in ROS2 for object detection. [Installation Guide](https://github.com/mgonzs13/yolov8_ros) 
+- **yolovX_ros**: Follow the instructions to set up YOLOvX in ROS2 for object detection. [Installation Guide](https://github.com/mgonzs13/yolov8_ros)
+- **C++ compiler (GCC 8 or newer).**
+- **PCL (Point Cloud Library), OpenCV, and other ROS2 dependencies.**
 
+### Install Dependencies:
+Install the necessary dependencies using the following command:
+```bash
+sudo apt-get update
+sudo apt-get install libpcl-dev libopencv-dev
+```
 ### Clone the Repository
 ```bash
 cd ~/ros2_ws/src
-git clone https://github.com/yourusername/ros2_lidar_camera_fusion_with_detection.git
+git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection.git
 ```
-### Install Dependencies
-Run `rosdep` to install any missing dependencies:
+### Build the Package:
+Navigate back to your ROS2 workspace root and use ``colcon`` to build the package:
 ```bash
 cd ~/ros2_ws
-rosdep install --from-paths src --ignore-src -r -y
+colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
 ```
-### Build the Package
-After cloning and installing dependencies, build your package:
+### Source the setup files:
+To make the ROS2 package available in your environment, source the setup file::
 ```bash
-colcon build --packages-select ros2_lidar_camera_fusion_with_detection
+source install/setup.bash
 ```
 ---
 
