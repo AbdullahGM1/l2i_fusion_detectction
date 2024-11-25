@@ -31,7 +31,7 @@ Previously, I created a similar package in Python: [ros2_lidar_camera_fusion_wit
 </p>
 
 <p align="center">
-  <img src="images/Camera&Lidar_Fusion.gif" alt="Lidar-Camera Fusion in Action gif" width="500"/>
+  <img src="images/Camera_Lidar_Fusion.gif" alt="Lidar-Camera Fusion in Action gif" width="500"/>
 </p>
 
 <p align="center">
@@ -48,13 +48,11 @@ Previously, I created a similar package in Python: [ros2_lidar_camera_fusion_wit
 
 ## Features
 
-- **Lidar to Camera Frame Transformation**: Fuse lidar point cloud data into the camera reference frame.
-- **Object Detection Overlay**: Overlays lidar points corresponding to detected objects (within bounding boxes) onto the camera image.
+- **Dynamic Transform Handling**: Employs a tf2 buffer and listener to manage and apply transformations between coordinate frames dynamically, ensuring data consistency across different sensor inputs.
 - **3D Position Estimation**: Calculates the average (x, y, z) of point clouds within object bounding boxes to estimate 3D positions.
-- **Multi-Object Tracking**: Simultaneously tracks and estimates positions for multiple detected objects in real-time.
-- **Detected Object Point Cloud Publishing**: Publishes lidar points overlaid onto the image within detected object bounding boxes as a separate point cloud.
-- **ROS2 Integration**: Fully compatible with ROS2 for seamless integration in robotics applications.
-  
+- **Interactive Visualization**: Offers real-time visual feedback by projecting lidar points of the detected objects onto camera images, enhancing the visual assessment of alignment and accuracy in the sensor fusion process.
+- **Detected Object Point Cloud Streaming**: Publishes the points within bounding boxes (BB) as distinct point clouds for each detected object.
+- **Multi-Object Detection and Localization**: Simultaneously detects and estimates positions for multiple detected objects in real-time.
 ---
 
 ## Installation
