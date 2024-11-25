@@ -21,19 +21,6 @@ def generate_launch_description():
         ]
     )
 
-    point_cloud_to_depth_map_node = Node(
-        package='ros2_depth_map_pcl',
-        executable='depth_map',
-        name='point_cloud_to_depth_map',
-        parameters=[
-            {'width': 650, 'height': 650, 'scale': 50, 'MinDepth': 0.2, 'MaxDepth': 30.0}
-        ],
-        remappings=[
-            ('/scan/points', '/scan/points'),
-            ('/yolo/tracking', '/yolo/tracking')
-        ]
-    )
-
     yolov8_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             PathJoinSubstitution([
@@ -51,7 +38,6 @@ def generate_launch_description():
 
     return LaunchDescription([
         lidar_camera_fusion_node,
-        point_cloud_to_depth_map_node,
         yolov8_launch
     ])
 
