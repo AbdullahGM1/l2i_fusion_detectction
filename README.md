@@ -90,32 +90,53 @@ source install/setup.bash
 
 ## Usage
 
-### Modifying the Package for Your Setup
-Before running the package, make sure to modify the `setup_config.yaml` file located in the `/ros2_lidar_camera_fusion_with_detection/config` directory to match your setup:
+The package contains two ``launch`` files:
 
-1. **Configure the Transformation Matrix**: Modify the transformation matrix between the Lidar and the camera to match your setup by updating
-   Example:
-```
-transformation_matrix:
-  - [0, -1, 0, 0.1]
-  - [0, 0, -1, 0]
-  - [1, 0, 0, 0]
-  - [0, 0, 0, 1]
-```
+- The first ``lidar_camera_fusion.launch.py`` is to run just ``lidar_camera_fusion_with_detection`` node.
+- The second ``lidar_camera_fusion_yolo.launch.py`` is to run just ``lidar_camera_fusion_with_detection`` and ``yolo_ros`` nodes.
 
-3. **Specify the Depth Range**: Set the depth range for points that should be transformed. In this example, only points between 0.5 and 10 meters are considered.
+### Modifying the the Launch File
+Before running the package, make sure to modify the `launch` files located in the `ros2_lidar_camera_fusion_with_detection_cpp/launch` directory to match your setup:
+
+1. **Set the min and max values**: Set the `Minimum` and `Maximum` values of the depth range for the Lidar point cloud. The depth is in `x-axis`.
    Example:
-   
+```python
+parameters=[
+    {'min_depth': 0.2, 'max_depth': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
 ```
-  depth_range:
-  min: 0.5  # Minimum depth
-  max: 10   # Maximum depth
+2. **Set the source and target frames**: Set the `source` frame and the `target` frame of the sensors to get the transformation matrix between these two frames. In this case, the `source` frame is the `lidar` and the `target` is the `camera` frame. 
+   Example:
+```python
+'lidar_frame': 'source/frame/name',  # Default source frame
+'camera_frame': 'target/frame/name'}  # Default target frame
+```
+3. **Set the Topic Names**: Set the `topics` names that the node needs to do the lidar/camera fusion. 
+   Example:
+```python
+],
+remappings=[
+# Replace with actual topic names
+            ('/scan/points', '/lidar/topic/name'), # The lidar point cloud topic
+            ('/interceptor/gimbal_camera_info', '/camerainfo/topic/name'),# The camera info topic
+            ('/interceptor/gimbal_camera', '/camera/topic/name'), # The camera image topic 
+            ('/yolo/tracking', '/yolo/tracking/topic/name') # The YOLO BB tracking topic
+        ]
+```
+4. **Set the Yolo Parameters**: Set the `yolo_ros` package arguments for the `model`, `input_image_topic`, and `threshold`. 
+   Example:
+```python
+        launch_arguments={
+            'model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/yolo11s.pt',
+            'threshold': '0.5',
+            'input_image_topic': '/interceptor/gimbal_camera',
+            'device': 'cuda:0'
+        }.items()
 ```
 ### Build the Package
-After modifying the code, build your package:
+After modifying the `launch` file, build your package:
 ```bash
 cd ~/ros2_ws
-colcon build --packages-select ros2_lidar_camera_fusion_with_detection
+colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
 ```
 ### Source the Workspace
 Before running the package, ensure you source the workspace to have access to the built packages:
@@ -126,9 +147,14 @@ source ~/ros2_ws/install/setup.bash
 ```
 
 ### Run the Node
-To run the package with your custom launch file (make sure you specify it):
+To run the package:
 ```bash
-ros2 run ros2_lidar_camera_fusion_with_detection lidar_camera_fusion_with_detection
+ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion.launch.py
+```
+Or 
+
+```bash
+ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion_yolo.launch.py
 ```
 
 ---
