@@ -64,12 +64,6 @@ install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
-# Install the configuration files
-install(
-  DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
-)
-
 # Export dependencies
 ament_package()
 
