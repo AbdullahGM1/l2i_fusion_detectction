@@ -64,10 +64,6 @@ install(DIRECTORY launch/
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 3a4107d3e3e3b623cbb9a0987bac178f004c46bb
 # Export dependencies
 ament_package()
 
