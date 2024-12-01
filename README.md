@@ -1,189 +1,147 @@
-# ROS2 Camera-Lidar Fusion Package
+# 🤖 ROS2 Camera-Lidar Fusion Package
 
-## Description
+## 📝 Description
 
-This ROS2 package fuses 360-degree lidar and camera data for enhanced object tracking. It transforms lidar point clouds from the lidar frame to the camera frame and overlays the points within the detected object bounding boxes onto the image. The system estimates the 3D positions of the detected objects by averaging the point cloud (x, y, z) within the bounding box and publishes these points as point cloud data. This enables real-time tracking and position estimation for multiple objects. 
+This ROS2 package provides advanced sensor fusion capabilities by combining 360-degree lidar and camera data for enhanced object tracking and localization. The package transforms lidar point clouds from the lidar frame to the camera frame, overlaying detected object point clouds onto the image. By averaging the point cloud coordinates within object bounding boxes, the system enables real-time 3D position estimation for multiple objects.
 
-Previously, I created a similar package in Python: [ros2_lidar_camera_fusion_with_detection](https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection/tree/main). In this new version, developed in C++ for improved performance with large lidar point cloud data, I use the PCL library to handle the point clouds efficiently. Additionally, I have enhanced the code to handle static transforms (tf) for the sensors better, optimizing overall system performance.---
+## 🚀 Key Improvements from Previous Version
+- Reimplemented in C++ for improved performance with large lidar point cloud datasets
+- Utilizes PCL (Point Cloud Library) for efficient point cloud processing
+- Enhanced static transform (tf) handling for optimized sensor integration
 
-## Table of Contents
+## 📋 Table of Contents
 1. [Demonstration](#demonstration)
 2. [Features](#features)
 3. [Installation](#installation)
 4. [Usage](#usage)
-5. [Node](#node)
+5. [Node Details](#node)
 6. [Contributing](#contributing)
 
----
-## Demonstration
+## 🎥 Demonstration
 
-### Lidar-Camera Fusion in Action
-
+### 📸 Lidar-Camera Fusion Visualization
 
 <p align="center">
-- Overlays the detected object point cloud points onto the image:
+Overlaying Detected Object Point Cloud Points onto Camera Image:
 </p>
-
 
 <p align="center">
   <img src="images/1.png" alt="Lidar-Camera Fusion Example 1" width="500"/>
   <img src="images/2.png" alt="Lidar-Camera Fusion Example 2" width="500"/>
+  <img src="images/Camera_Lidar_Fusion.gif" alt="Lidar-Camera Fusion in Action" width="500"/>
 </p>
 
 <p align="center">
-  <img src="images/Camera_Lidar_Fusion.gif" alt="Lidar-Camera Fusion in Action gif" width="500"/>
+Publishing Points Within Detected Object Bounding Boxes:
 </p>
 
 <p align="center">
-- Publish the points within the detected object bounding boxes as point cloud points.
+  <img src="images/4.png" alt="Lidar-Camera Fusion Point Cloud" width="500"/>
+  <img src="images/Camera_Lidar_Fusion_point_cloud_.gif" alt="Lidar-Camera Fusion Point Cloud Demonstration" width="500"/>
 </p>
 
+## ✨ Features
 
-<p align="center">
-  <img src="images/4.png" alt="Lidar-Camera Fusion Example 1" width="500"/>
-  <img src="images/Camera_Lidar_Fusion_point_cloud_.gif" alt="Lidar-Camera Fusion Example 2" width="500"/>
-</p>
+- **Dynamic Transform Management**: Advanced tf2 buffer and listener for seamless coordinate frame transformations
+- **Precise 3D Position Estimation**: Calculates average (x, y, z) coordinates of point clouds within object bounding boxes
+- **Real-time Visualization**: Interactive projection of lidar points onto camera images
+- **Comprehensive Object Tracking**:
+  - Detected object point cloud streaming
+  - Simultaneous multi-object detection and localization
+- **Full ROS2 Integration**: Seamless compatibility with ROS2 robotics ecosystem
 
----
+## 🛠️ Installation
 
-## Features
+### 📋 Prerequisites
+- **🤖 ROS2 Humble** ([Installation Guide](https://docs.ros.org/en/humble/Installation.html))
+- **🕵️ YOLOvX ROS** ([Setup Instructions](https://github.com/mgonzs13/yolov8_ros))
+- **💻 C++ Compiler**: GCC 8 or newer
+- **📚 Required Libraries**: PCL, OpenCV, and standard ROS2 dependencies
 
-- **Dynamic Transform Handling**: Employs a tf2 buffer and listener to manage and apply transformations between coordinate frames dynamically, ensuring data consistency across different sensor inputs.
-- **3D Position Estimation**: Calculates the average (x, y, z) of point clouds within object bounding boxes to estimate 3D positions.
-- **Interactive Visualization**: Offers real-time visual feedback by projecting lidar points of the detected objects onto camera images, enhancing the visual assessment of alignment and accuracy in the sensor fusion process.
-- **Detected Object Point Cloud Streaming**: Publishes the points within bounding boxes (BB) as distinct point clouds for each detected object.
-- **Multi-Object Detection and Localization**: Simultaneously detects and estimates positions for multiple detected objects in real-time.
-- **ROS2 Integration**: Fully compatible with ROS2 for seamless integration in robotics applications.
----
-
-## Installation
-
-### Prerequisites
-- **ROS2 Humble**: Ensure you have ROS2 Humble installed on your machine. [Installation Guide](https://docs.ros.org/en/humble/Installation.html)
-- **yolovX_ros**: Follow the instructions to set up YOLOvX in ROS2 for object detection. [Installation Guide](https://github.com/mgonzs13/yolov8_ros)
-- **C++ compiler (GCC 8 or newer).**
-- **PCL (Point Cloud Library), OpenCV, and other ROS2 dependencies.**
-
-### Install Dependencies:
-Install the necessary dependencies using the following command:
+### 📦 Dependency Installation
 ```bash
 sudo apt-get update
 sudo apt-get install libpcl-dev libopencv-dev
 ```
-### Clone the Repository
+
+### 📂 Repository Setup
 ```bash
 cd ~/ros2_ws/src
 git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection_cpp.git
 ```
-### Build the Package:
-Navigate back to your ROS2 workspace root and use ``colcon`` to build the package:
+
+### 🏗️ Build Process
 ```bash
 cd ~/ros2_ws
 colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
-```
-### Source the setup files:
-To make the ROS2 package available in your environment, source the setup file::
-```bash
 source install/setup.bash
 ```
----
 
-## Usage
+## 🚀 Usage
 
-The package contains two ``launch`` files:
+Two launch files are provided:
+1. `lidar_camera_fusion.launch.py`: Runs the lidar-camera fusion node
+2. `lidar_camera_fusion_yolo.launch.py`: Runs fusion node with YOLO detection
 
-- The first ``lidar_camera_fusion.launch.py`` is to run just ``lidar_camera_fusion_with_detection`` node.
-- The second ``lidar_camera_fusion_yolo.launch.py`` is to run just ``lidar_camera_fusion_with_detection`` and ``yolo_ros`` nodes.
+### ⚙️ Configuration Steps
 
-### Modifying the the Launch File
-Before running the package, make sure to modify the `launch` files located in the `ros2_lidar_camera_fusion_with_detection_cpp/launch` directory to match your setup:
+Before running, modify launch files in `ros2_lidar_camera_fusion_with_detection_cpp/launch`:
 
-1. **Set the min and max values**: Set the `Minimum` and `Maximum` values of the depth range for the Lidar point cloud. The depth is in `x-axis`.
-   Example:
+1. **Depth Range Configuration**:
 ```python
 parameters=[
-    {'min_depth': 0.2, 'max_depth': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
+    {'min_depth': 0.2, 'max_depth': 10.0}  # Adjust lidar depth range
+]
 ```
-2. **Set the source and target frames**: Set the `source` frame and the `target` frame of the sensors to get the transformation matrix between these two frames. In this case, the `source` frame is the `lidar` and the `target` is the `camera` frame. 
-   Example:
+
+2. **Sensor Frame Setup**:
 ```python
-'lidar_frame': 'source/frame/name',  # Default source frame
-'camera_frame': 'target/frame/name'}  # Default target frame
+'lidar_frame': 'source/frame/name',
+'camera_frame': 'target/frame/name'
 ```
-3. **Set the Topic Names**: Set the `topics` names that the node needs to do the lidar/camera fusion. 
-   Example:
+
+3. **Topic Remapping**:
 ```python
-],
 remappings=[
-# Replace with actual topic names
-            ('/scan/points', '/lidar/topic/name'), # The lidar point cloud topic
-            ('/interceptor/gimbal_camera_info', '/camerainfo/topic/name'),# The camera info topic
-            ('/interceptor/gimbal_camera', '/camera/topic/name'), # The camera image topic 
-            ('/yolo/tracking', '/yolo/tracking/topic/name') # The YOLO BB tracking topic
-        ]
+    ('/scan/points', '/lidar/topic/name'),
+    ('/interceptor/gimbal_camera_info', '/camerainfo/topic/name'),
+    ('/interceptor/gimbal_camera', '/camera/topic/name'),
+    ('/yolo/tracking', '/yolo/tracking/topic/name')
+]
 ```
-4. **Set the Yolo Parameters**: Set the `yolo_ros` package arguments for the `model`, `input_image_topic`, and `threshold`. 
-   Example:
+
+4. **YOLO Configuration**:
 ```python
-        launch_arguments={
-            'model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/yolo11s.pt',
-            'threshold': '0.5',
-            'input_image_topic': '/interceptor/gimbal_camera',
-            'device': 'cuda:0'
-        }.items()
-```
-### Build the Package
-After modifying the `launch` file, build your package:
-```bash
-cd ~/ros2_ws
-colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
-```
-### Source the Workspace
-Before running the package, ensure you source the workspace to have access to the built packages:
-
-For **Bash**:
-```bash
-source ~/ros2_ws/install/setup.bash
+launch_arguments={
+    'model': '/path/to/model.pt',
+    'threshold': '0.5',
+    'input_image_topic': '/interceptor/gimbal_camera',
+    'device': 'cuda:0'
+}.items()
 ```
 
-### Run the Node
-To run the package:
+### Execution
 ```bash
+# Option 1: Run fusion node
 ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion.launch.py
-```
-Or 
 
-```bash
+# Option 2: Run with YOLO detection
 ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion_yolo.launch.py
 ```
 
----
-## Node
+## 🧩 Node Details: `lidar_camera_fusion_node`
 
-### `lidar_camera_fusion_node`
+### 📡 Subscribed Topics
+- `/scan/points`: Lidar point cloud data
+- `/interceptor/gimbal_camera`: Camera image
+- `/interceptor/gimbal_camera_info`: Camera information
+- `/yolo/tracking`: Detected object bounding boxes
 
-This node fuses lidar point cloud data onto the camera image frame and overlays the points within detected object bounding boxes onto the image. Also, publishing the points within the bounding box as point cloud points.
+### 📤 Published Topics
+- `/image_lidar`: Image with projected Lidar points
+- `/detected_object_distance`: Average distance from detected objects
+- `/detected_object_pointcloud`: Point cloud of objects within bounding boxes
 
-#### Subscribed Topics:
+## 🤝 Contributing
 
--**`/scan/points`**: Lidar point cloud data.
-
--**`/interceptor/gimbal_camera`**: Camera image output.
-
--**`/interceptor/gimbal_camera_info`**: Camera info for the Camera Intrinsic.
-
--**`/yolo/tracking`**: Detected objects with bounding boxes.
-
-
-#### Published Topics:
-
--**`/image_lidar`**: Image with projected Lidar points.
-
--**`/detected_object_distance`**: Average distance from the detected objects to the camera frame.
-
--**`/detected_object_pointcloud`**: Points inside the bounding boxes are published as point cloud points.
-
----
-## Contributing
-
-Feel free to contribute to this project by creating pull requests or opening issues.
+Feel free to contribute to this project by creating pull requests or opening issues! 🌟
