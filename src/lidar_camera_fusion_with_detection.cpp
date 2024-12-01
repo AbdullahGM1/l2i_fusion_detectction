@@ -162,7 +162,7 @@ private:
     pcl::fromROSMsg(cloud_transformed, *cloud_camera_frame);
 
     projected_points_.clear();  // Clear previous points
-
+//////////////////////////////////////////////////////////////////////////////////
     // Create a vector to store point clouds for each detected object
     std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> object_point_clouds;
     for (const auto& bbox : bounding_boxes) {
@@ -193,7 +193,7 @@ private:
             }
         }
     }
-
+//////////////////////////////////////////////////////////////////////////////////
     // Publish object point clouds
     for (size_t bbox_idx = 0; bbox_idx < bounding_boxes.size(); ++bbox_idx) {
         const auto& bbox = bounding_boxes[bbox_idx];
