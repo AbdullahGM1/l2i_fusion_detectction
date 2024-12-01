@@ -32,7 +32,7 @@ def generate_launch_description():
             ])
         ]),
         launch_arguments={
-            'model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/yolo11s.pt',
+            'model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/rgb_drone_detection.pt',
             'threshold': '0.5',
             'input_image_topic': '/interceptor/gimbal_camera',
             'namespace': 'rgb',  
