@@ -17,10 +17,10 @@ def generate_launch_description():
         ],
         remappings=[
             # Replace with actual topic names
-            ('/scan/points', '/scan/points'), # The lidar point cloud topic
-            ('/interceptor/gimbal_camera_info', '/interceptor/gimbal_camera_info'),# The camera info topic
-            ('/interceptor/gimbal_camera', '/interceptor/gimbal_camera'), # The camera image topic 
-            ('/yolo/tracking', '/yolo/tracking') # The YOLO BB tracking topic
+            ('/scan/points', '/scan/points'), # The lidar point cloud topic - replace the second topic to your topic
+            ('/interceptor/gimbal_camera_info', '/interceptor/gimbal_camera_info'),# The camera info topic - replace the second topic to your topic
+            ('/interceptor/gimbal_camera', '/interceptor/gimbal_camera'), # The camera image topic - replace the second topic to your topic
+            ('/rgb/tracking', '/rgb/tracking') # The YOLO BB tracking topic - replace the second topic to your topic
         ]
     )
 

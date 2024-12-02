@@ -24,14 +24,18 @@ public:
   : Node("lidar_camera_fusion_node"), // Initialize the node with a name
     tf_buffer_(std::make_shared<rclcpp::Clock>(), tf2::durationFromSec(10.0)), // Setup tf2 buffer with a 10 second storage
     tf_listener_(tf_buffer_), // Initialize tf2 listener to manage transformations
-    lidar_frame_("x500_mono_1/lidar_link/gpu_lidar"),  // Predefined source frame for lidar data
-    camera_frame_("interceptor/gimbal_camera")  // Predefined target frame for camera data
   {
-    // Declare and retrieve parameters for filtering the point cloud
+    // Declare parameters with default values
     this->declare_parameter<float>("min_depth", 0.2);
     this->declare_parameter<float>("max_depth", 10.0);
+    this->declare_parameter<std::string>("lidar_frame", "x500_mono_1/lidar_link/gpu_lidar");
+    this->declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
+    
+    // Retrieve parameters
     this->get_parameter("min_depth", min_depth_);
     this->get_parameter("max_depth", max_depth_);
+    this->get_parameter("lidar_frame", lidar_frame_);
+    this->get_parameter("camera_frame", camera_frame_);
 
     // Create a subscription to the point cloud topic
     subscriber_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
