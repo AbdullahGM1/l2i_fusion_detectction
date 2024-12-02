@@ -47,7 +47,7 @@ public:
 
     // Create a subscription to the YOLO BB
     detection_subscriber_ = this->create_subscription<yolov8_msgs::msg::DetectionArray>(
-        "/yolo/tracking", 10, std::bind(&LidarCameraFusionNode::detection_callback, this, std::placeholders::_1));
+        "/rgb/tracking", 10, std::bind(&LidarCameraFusionNode::detection_callback, this, std::placeholders::_1));
 
     // Create a publisher for the lidar/camera fusion
     image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("/image_lidar_fusion", 10);
