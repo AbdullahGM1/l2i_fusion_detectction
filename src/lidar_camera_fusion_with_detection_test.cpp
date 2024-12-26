@@ -133,8 +133,8 @@ LidarCameraFusionNode::LidarCameraFusionNode()
         "/interceptor/gimbal_camera_info", 10, std::bind(&LidarCameraFusionNode::caminfoCallback, this, std::placeholders::_1));
     // RCLCPP_INFO(this->get_logger(), "Subscribed to /observer/camera_info");
 
-    object_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("detected_object_positions", 10);
-    overlay_image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("overlay_image", 10);
+    object_pose_pub_ = this->create_publisher<geometry_msgs::msg::PoseArray>("detected_object_pose", 10);
+    overlay_image_pub_ = this->create_publisher<sensor_msgs::msg::Image>("/image_lidar_fusion", 10);
     object_point_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("detected_points_cloud", 10);
 
     // RCLCPP_INFO(this->get_logger(), "Publishers created. Initialization complete.");
