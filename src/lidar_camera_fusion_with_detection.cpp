@@ -33,6 +33,10 @@ public:
     this->get_parameter("min_depth", min_depth_);
     this->get_parameter("max_depth", max_depth_);
 
+    // Log parameters
+        RCLCPP_INFO(this->get_logger(), "Loaded Parameters: MinDepth=%f, MaxDepth=%f",
+                   min_depth_, max_depth_);
+
     // Create a subscription to the point cloud topic
     subscriber_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
         "/scan/points", 10, std::bind(&LidarCameraFusionNode::point_cloud_callback, this, std::placeholders::_1));
