@@ -12,7 +12,6 @@ def generate_launch_description():
         name='lidar_camera_fusion_node',
         parameters=[
             {'min_depth': 0.2, 'max_depth': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
-             'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar',  # Default source frame
              'camera_frame': 'interceptor/gimbal_camera'}  # Default target frame
         ],
         remappings=[
@@ -32,7 +31,7 @@ def generate_launch_description():
             ])
         ]),
         launch_arguments={
-            'model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/rgb_drone_detection.pt',
+            'model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/test01.pt',
             'threshold': '0.5',
             'input_image_topic': '/interceptor/gimbal_camera',
             'namespace': 'rgb',  

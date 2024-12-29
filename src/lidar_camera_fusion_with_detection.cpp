@@ -18,24 +18,27 @@
 // Define the LidarCameraFusionNode class which inherits from rclcpp::Node
 class LidarCameraFusionNode : public rclcpp::Node
 {
-public:
+    public:
   // Constructor for the node
   LidarCameraFusionNode()
-  : Node("lidar_camera_fusion_node"), // Initialize the node with a name
-    tf_buffer_(std::make_shared<rclcpp::Clock>(), tf2::durationFromSec(10.0)), // Setup tf2 buffer with a 10 second storage
-    tf_listener_(tf_buffer_), // Initialize tf2 listener to manage transformations
-    lidar_frame_("x500_mono_1/lidar_link/gpu_lidar"),  // Predefined source frame for lidar data
-    camera_frame_("interceptor/gimbal_camera")  // Predefined target frame for camera data
+  : Node("lidar_camera_fusion_node"),  // Initialize the node with a name
+    tf_buffer_(this->get_clock()),    // Initialize tf2 buffer
+    tf_listener_(tf_buffer_)         // Initialize tf2 listener
   {
+    // Predefined target frame for camera data
+    camera_frame_ = "interceptor/gimbal_camera";
+
     // Declare and retrieve parameters for filtering the point cloud
+    this->declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
     this->declare_parameter<float>("min_depth", 0.2);
     this->declare_parameter<float>("max_depth", 10.0);
+    this->get_parameter("camera_frame", camera_frame_);
     this->get_parameter("min_depth", min_depth_);
     this->get_parameter("max_depth", max_depth_);
 
     // Log parameters
-        RCLCPP_INFO(this->get_logger(), "Loaded Parameters: MinDepth=%f, MaxDepth=%f",
-                   min_depth_, max_depth_);
+    RCLCPP_INFO(this->get_logger(), "Loaded Parameters: Camera Frame = %s, MinDepth = %f, MaxDepth = %f",
+                camera_frame_.c_str(), min_depth_, max_depth_);
 
     // Create a subscription to the point cloud topic
     subscriber_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
@@ -248,16 +251,10 @@ private:
 
 }
 
-  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscriber_;
-  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_subscriber_;
-  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscriber_;
-  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
-  rclcpp::Subscription<yolov8_msgs::msg::DetectionArray>::SharedPtr detection_subscriber_;
-  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_publisher_;
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr object_point_cloud_publisher_; // New publisher
+  // Member variables
 
-  tf2_ros::Buffer tf_buffer_;
-  tf2_ros::TransformListener tf_listener_;
+  tf2_ros::Buffer tf_buffer_;  // TF2 buffer for transforms
+  tf2_ros::TransformListener tf_listener_;  // TF2 transform listener
   image_geometry::PinholeCameraModel camera_model_;
   float min_depth_, max_depth_;
   std::string lidar_frame_;
@@ -267,6 +264,15 @@ private:
   cv::Mat current_image_;
   std::vector<cv::Point2d> projected_points_;
   std::vector<BoundingBox> bounding_boxes;
+
+  rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr subscriber_;
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_subscriber_;
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_subscriber_;
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
+  rclcpp::Subscription<yolov8_msgs::msg::DetectionArray>::SharedPtr detection_subscriber_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr object_point_cloud_publisher_;
+
 };
 
 int main(int argc, char **argv)
