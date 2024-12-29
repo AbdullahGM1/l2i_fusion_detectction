@@ -25,9 +25,7 @@ class LidarCameraFusionNode : public rclcpp::Node
     tf_buffer_(this->get_clock()),    // Initialize tf2 buffer
     tf_listener_(tf_buffer_)         // Initialize tf2 listener
   {
-    // Predefined target frame for camera data
-    camera_frame_ = "interceptor/gimbal_camera";
-
+   
     // Declare and retrieve parameters for filtering the point cloud
     this->declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
     this->declare_parameter<float>("min_depth", 0.2);
