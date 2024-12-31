@@ -79,13 +79,12 @@ source install/setup.bash
 
 ## 🚀 Usage
 
-Two launch files are provided:
-1. `lidar_camera_fusion.launch.py`: Runs the lidar-camera fusion node
-2. `lidar_camera_fusion_yolo.launch.py`: Runs fusion node with YOLO detection
+The launch file is provided:
+- `lidar_camera_fusion_yolo.launch.py`: Runs fusion node with YOLO detection node. 
 
 ### ⚙️ Configuration Steps
 
-Before running, modify launch files in `ros2_lidar_camera_fusion_with_detection_cpp/launch`:
+Before running, modify the launch `lidar_camera_fusion_yolo.launch.py` file in `ros2_lidar_camera_fusion_with_detection_cpp/launch`:
 
 1. **Depth Range Configuration**:
 ```python
@@ -95,9 +94,9 @@ parameters=[
 ```
 
 2. **Sensor Frame Setup**:
+   Add your camera frame "Target Frame". 
 ```python
-'lidar_frame': 'source/frame/name',
-'camera_frame': 'target/frame/name'
+'camera_frame': 'interceptor/gimbal_camera'
 ```
 
 3. **Topic Remapping**:
@@ -122,10 +121,7 @@ launch_arguments={
 
 ### Execution
 ```bash
-# Option 1: Run fusion node
-ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion.launch.py
-
-# Option 2: Run with YOLO detection
+#Run with YOLO detection
 ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion_yolo.launch.py
 ```
 
