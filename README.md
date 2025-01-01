@@ -111,7 +111,7 @@ parameters=[
 remappings=[
             # Replace with actual topic names
             ('/scan/points', '/scan/points'), # The lidar point cloud topic - replace the second topic to your topic
-            ('/interceptor/gimbal_camera_info', '/interceptor/gimbal_camera_info'),# The camera info topic - replace the second topic to your topic
+            ('/interceptor/gimbal_camera_info', '/interceptor/gimbal_camera_info'), # The camera info topic - replace the second topic to your topic
             ('/interceptor/gimbal_camera', '/interceptor/gimbal_camera'), # The camera image topic - replace the second topic to your topic
             ('/rgb/tracking', '/rgb/tracking') # The YOLO BB tracking topic - replace the second topic to your topic
 ```
@@ -119,9 +119,9 @@ remappings=[
 ### 3. Configure YOLO Settings
 
 ```yaml
-model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/test01.pt',
-            'threshold': '0.5',
-            'input_image_topic': '/interceptor/gimbal_camera',
+model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/test01.pt', # Add your Yolov11 Model
+            'threshold': '0.5', # Set the threshold for your detection
+            'input_image_topic': '/interceptor/gimbal_camera', # Add your in image input topic
             'namespace': 'rgb',  
             'device': 'cuda:0'
 ```
@@ -131,7 +131,7 @@ model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/t
 ```bash
 # Build the package
 cd ~/ros2_ws
-colcon build --packages-select ros2_lidar_camera_fusion
+colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
 source install/setup.bash
 
 # Launch the node
