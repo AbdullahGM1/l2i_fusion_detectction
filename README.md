@@ -67,7 +67,7 @@ Publishing Points Within Detected Object Bounding Boxes:
 - `/detected_object_pose` ([geometry_msgs/msg/PoseArray]) - 3D object poses
 - `/detected_object_point_cloud` ([sensor_msgs/msg/PointCloud2]) - Object point clouds
 
-#### Parameters
+### Parameters
 - `lidar_frame` (string, default: "x500_mono_1/lidar_link/gpu_lidar")
 - `camera_frame` (string, default: "interceptor/gimbal_camera")
 - `min_depth` (float, default: 0.2)
