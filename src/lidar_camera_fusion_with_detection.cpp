@@ -9,14 +9,16 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/crop_box.h>
-#include <pcl/common/transforms.h> // Include for pcl::transformPointCloud
+#include <pcl/common/transforms.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <tf2_eigen/tf2_eigen.hpp> // Correct header for tf2_eigen
+#include <tf2_eigen/tf2_eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <geometry_msgs/msg/pose_stamped.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 class LidarCameraFusionNode : public rclcpp::Node
 {
@@ -43,9 +45,11 @@ private:
     void declare_parameters()
     {
         declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
+        declare_parameter<std::string>("lidar_frame", "x500_mono_1/lidar_link/gpu_lidar");
         declare_parameter<float>("min_depth", 0.2);
         declare_parameter<float>("max_depth", 10.0);
         get_parameter("camera_frame", camera_frame_);
+        get_parameter("lidar_frame", lidar_frame_);
         get_parameter("min_depth", min_depth_);
         get_parameter("max_depth", max_depth_);
     }
@@ -92,7 +96,7 @@ private:
         std::vector<cv::Point2d> projected_points = projectPointsAndAssociateWithBoundingBoxes(cloud_camera_frame, bounding_boxes);
 
         // Calculate object poses
-        geometry_msgs::msg::PoseArray pose_array = calculateObjectPoses(bounding_boxes);
+        geometry_msgs::msg::PoseArray pose_array = calculateObjectPoses(bounding_boxes, point_cloud_msg->header.stamp);
 
         // Prepare object point clouds for publishing
         std::vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> object_point_clouds;
@@ -180,11 +184,12 @@ private:
         return projected_points;
     }
 
-    geometry_msgs::msg::PoseArray calculateObjectPoses(const std::vector<BoundingBox>& bounding_boxes)
+    geometry_msgs::msg::PoseArray calculateObjectPoses(const std::vector<BoundingBox>& bounding_boxes,
+                                                       const rclcpp::Time& cloud_time)
     {
         geometry_msgs::msg::PoseArray pose_array;
-        pose_array.header.stamp = now();
-        pose_array.header.frame_id = camera_frame_;
+        pose_array.header.stamp = cloud_time;
+        pose_array.header.frame_id = lidar_frame_; // Set to lidar frame
 
         for (const auto& bbox : bounding_boxes) {
             if (bbox.count > 0) {
@@ -192,13 +197,22 @@ private:
                 double avg_y = bbox.sum_y / bbox.count;
                 double avg_z = bbox.sum_z / bbox.count;
 
-                geometry_msgs::msg::Pose pose;
-                pose.position.x = avg_x;
-                pose.position.y = avg_y;
-                pose.position.z = avg_z;
-                pose.orientation.w = 1.0;
+                // Create a Pose in camera frame
+                geometry_msgs::msg::PoseStamped pose_camera;
+                pose_camera.header.stamp = cloud_time;
+                pose_camera.header.frame_id = camera_frame_;
+                pose_camera.pose.position.x = avg_x;
+                pose_camera.pose.position.y = avg_y;
+                pose_camera.pose.position.z = avg_z;
+                pose_camera.pose.orientation.w = 1.0;
 
-                pose_array.poses.push_back(pose);
+                // Transform pose to lidar frame
+                try {
+                    geometry_msgs::msg::PoseStamped pose_lidar = tf_buffer_.transform(pose_camera, lidar_frame_, tf2::durationFromSec(1.0));
+                    pose_array.poses.push_back(pose_lidar.pose);
+                } catch (tf2::TransformException& ex) {
+                    RCLCPP_ERROR(get_logger(), "Failed to transform pose: %s", ex.what());
+                }
             }
         }
         return pose_array;
@@ -235,7 +249,7 @@ private:
     tf2_ros::TransformListener tf_listener_;
     image_geometry::PinholeCameraModel camera_model_;
     float min_depth_, max_depth_;
-    std::string camera_frame_;
+    std::string camera_frame_, lidar_frame_;
     int image_width_, image_height_;
 
     // Subscribers
