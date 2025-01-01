@@ -12,6 +12,7 @@ def generate_launch_description():
         name='lidar_camera_fusion_node',
         parameters=[
             {'min_depth': 0.2, 'max_depth': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
+             'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar',
              'camera_frame': 'interceptor/gimbal_camera'}  # Default target frame
         ],
         remappings=[

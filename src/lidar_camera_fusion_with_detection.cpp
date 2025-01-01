@@ -44,14 +44,25 @@ private:
 
     void declare_parameters()
     {
-        declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
         declare_parameter<std::string>("lidar_frame", "x500_mono_1/lidar_link/gpu_lidar");
+        declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
         declare_parameter<float>("min_depth", 0.2);
         declare_parameter<float>("max_depth", 10.0);
-        get_parameter("camera_frame", camera_frame_);
+
         get_parameter("lidar_frame", lidar_frame_);
+        get_parameter("camera_frame", camera_frame_);
         get_parameter("min_depth", min_depth_);
         get_parameter("max_depth", max_depth_);
+
+         // Print all parameters in one line
+        RCLCPP_INFO(
+            get_logger(),
+            "Parameters: lidar_frame='%s', camera_frame='%s', min_depth=%.2f, max_depth=%.2f",
+            lidar_frame_.c_str(),
+            camera_frame_.c_str(),
+            min_depth_,
+            max_depth_
+        );             
     }
 
     void initialize_subscribers_and_publishers()
