@@ -106,23 +106,45 @@ ros2 launch ros2_lidar_camera_fusion lidar_camera_fusion_yolo.launch.py
 ```
 
 ### Configuration
-Modify the launch file parameters in `launch/lidar_camera_fusion_yolo.launch.py.yaml`:
-  
-  1- `min_depth`
-  
 
+## Modify the launch file parameters:
+
+The launch file is located in `launch/lidar_camera_fusion_yolo.launch.py.yaml`. You need to modify the the following parameters based on you environment: 
+  
+  1- `min_range` - The minimum range of the lidar point cloud for (x,y,z) axes
+  2-  `max_range` - The maximum range of the lidar point cloud for (x,y,z) axes
+  3- `lidar_frame`  - The source frame
+  4- `camera_frame` - The target frame 
+  
 ```yaml
 parameters=[
-            {'min_depth': 0.2, 'max_depth': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
-             'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar',
-             'camera_frame': 'interceptor/gimbal_camera'}  # Default target frame
+            {'min_range': 0.2, 'max_range': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
+             'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar', # Default Source frame
+             'camera_frame': 'interceptor/gimbal_camera'}  # Default Target frame
+```
+## Modify the launch file topics :
+
+Reremapping the topics name to your topics:
+
+```yaml
+remappings=[
+            # Replace with actual topic names
+            ('/scan/points', '/scan/points'), # The lidar point cloud topic - replace the second topic to your topic
+            ('/interceptor/gimbal_camera_info', '/interceptor/gimbal_camera_info'),# The camera info topic - replace the second topic to your topic
+            ('/interceptor/gimbal_camera', '/interceptor/gimbal_camera'), # The camera image topic - replace the second topic to your topic
+            ('/rgb/tracking', '/rgb/tracking') # The YOLO BB tracking topic - replace the second topic to your topic
 ```
 
-### Transform Configuration
-Ensure proper tf2 configuration between your lidar and camera frames. Example static transform:
+## Modify the launch file yolo configurations :
 
-```bash
-ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 base_link camera_frame
+Modify the yolo `model` and `input_image_topic` to your image topics and the detection model. 
+
+```yaml
+model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/test01.pt',
+            'threshold': '0.5',
+            'input_image_topic': '/interceptor/gimbal_camera',
+            'namespace': 'rgb',  
+            'device': 'cuda:0'
 ```
 
 ## 🔍 Implementation Details
