@@ -48,7 +48,7 @@ Publishing Points Within Detected Object Bounding Boxes:
 - ROS2 Humble
 - Point Cloud Library (PCL)
 - OpenCV
-- YOLOv8 ROS
+- YOLOv11 ROS
 - tf2
 - message_filters
 - geometry_msgs
