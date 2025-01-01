@@ -84,32 +84,21 @@ Before using the package, you need the below requirements:
 - **📚 Required Libraries**: PCL, OpenCV, and standard ROS2 dependencies
 
 
-### Clone and Build Instructions
+### Clone the package 
 ```bash
 # Clone the repository
 cd ~/ros2_ws/src
 git clone https://github.com/YourUsername/ros2_lidar_camera_fusion.git
 
-# Build the package
-cd ~/ros2_ws
-colcon build --packages-select ros2_lidar_camera_fusion
-source install/setup.bash
 ```
 
 ## 🚀 Usage
 
-### Launch Files
-The package provides a primary launch file for running the fusion node with YOLOv11:
+Before running the package, you need to modify the launch file. The launch file is located in `launch/lidar_camera_fusion_yolo.launch.py.yaml`. 
 
-```bash
-ros2 launch ros2_lidar_camera_fusion lidar_camera_fusion_yolo.launch.py
-```
+### Modify the launch file parameters:
 
-### Configuration
-
-## Modify the launch file parameters:
-
-The launch file is located in `launch/lidar_camera_fusion_yolo.launch.py.yaml`. You need to modify the the following parameters based on you environment: 
+You need to modify the the following parameters based on you environment: 
   
   1- `min_range` - The minimum range of the lidar point cloud for (x,y,z) axes
   2-  `max_range` - The maximum range of the lidar point cloud for (x,y,z) axes
@@ -122,7 +111,7 @@ parameters=[
              'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar', # Default Source frame
              'camera_frame': 'interceptor/gimbal_camera'}  # Default Target frame
 ```
-## Modify the launch file topics :
+### Modify the launch file topics :
 
 Reremapping the topics name to your topics:
 
@@ -135,7 +124,7 @@ remappings=[
             ('/rgb/tracking', '/rgb/tracking') # The YOLO BB tracking topic - replace the second topic to your topic
 ```
 
-## Modify the launch file yolo configurations :
+### Modify the launch file yolo configurations :
 
 Modify the yolo `model` and `input_image_topic` to your image topics and the detection model. 
 
@@ -145,6 +134,19 @@ model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/t
             'input_image_topic': '/interceptor/gimbal_camera',
             'namespace': 'rgb',  
             'device': 'cuda:0'
+```
+### Build the package
+
+```bash
+# Build the package
+cd ~/ros2_ws
+colcon build --packages-select ros2_lidar_camera_fusion
+source install/setup.bash
+```
+### Run The Launch Files
+
+```bash
+ros2 launch ros2_lidar_camera_fusion lidar_camera_fusion_yolo.launch.py
 ```
 
 ## 🔍 Implementation Details
