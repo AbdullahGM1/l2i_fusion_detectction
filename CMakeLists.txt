@@ -32,9 +32,6 @@ include_directories(
 # Declare a C++ executable
 add_executable(lidar_camera_fusion_with_detection src/lidar_camera_fusion_with_detection.cpp)
 
-# Declare a C++ executable
-add_executable(lidar_camera_fusion_with_detection_test src/lidar_camera_fusion_with_detection_test.cpp)
-
 # Specify libraries to link a library or executable target against
 ament_target_dependencies(lidar_camera_fusion_with_detection
   rclcpp
@@ -48,21 +45,7 @@ ament_target_dependencies(lidar_camera_fusion_with_detection
   pcl_conversions
   yolov8_msgs
   tf2_sensor_msgs
-)
-
-# Specify libraries to link a library or executable target against
-ament_target_dependencies(lidar_camera_fusion_with_detection_test
-  rclcpp
-  sensor_msgs
-  tf2_ros
-  tf2_eigen
-  tf2_geometry_msgs
-  geometry_msgs
-  cv_bridge
   image_geometry
-  pcl_conversions
-  yolov8_msgs
-  tf2_sensor_msgs
 )
 
 target_link_libraries(lidar_camera_fusion_with_detection
@@ -71,16 +54,9 @@ target_link_libraries(lidar_camera_fusion_with_detection
   ${tf2_eigen_LIBRARIES}
 )
 
-target_link_libraries(lidar_camera_fusion_with_detection_test
-  ${OpenCV_LIBRARIES}
-  ${Eigen3_LIBRARIES}
-  ${tf2_eigen_LIBRARIES}
-)
-
 # Install the executable
 install(TARGETS
   lidar_camera_fusion_with_detection
-  lidar_camera_fusion_with_detection_test
   DESTINATION lib/${PROJECT_NAME}
 )
 
