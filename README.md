@@ -100,7 +100,7 @@ Modify the launch file `launch/lidar_camera_fusion_yolo.launch.py.yaml`:
 
 ```yaml
 parameters=[
-            {'min_range': 0.2, 'max_range': 10.0, # Setup your min and max depth range, where (x-axis) is the depth
+            {'min_range': 0.2, 'max_range': 10.0, # Setup your min and max range, where (x-axis) is the depth
              'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar', # Default Source frame
              'camera_frame': 'interceptor/gimbal_camera'}  # Default Target frame
 ```
