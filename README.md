@@ -135,7 +135,7 @@ colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
 source install/setup.bash
 
 # Launch the node
-ros2 launch ros2_lidar_camera_fusion lidar_camera_fusion_yolo.launch.py
+ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion_yolo.launch.py
 ```
 
 ### ⚠️ Important Note
