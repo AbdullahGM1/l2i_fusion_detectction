@@ -46,22 +46,22 @@ private:
     {
         declare_parameter<std::string>("lidar_frame", "x500_mono_1/lidar_link/gpu_lidar");
         declare_parameter<std::string>("camera_frame", "interceptor/gimbal_camera");
-        declare_parameter<float>("min_depth", 0.2);
-        declare_parameter<float>("max_depth", 10.0);
+        declare_parameter<float>("min_range", 0.2);
+        declare_parameter<float>("max_range", 10.0);
 
         get_parameter("lidar_frame", lidar_frame_);
         get_parameter("camera_frame", camera_frame_);
-        get_parameter("min_depth", min_depth_);
-        get_parameter("max_depth", max_depth_);
+        get_parameter("min_range", min_range_);
+        get_parameter("max_range", max_range_);
 
          // Print all parameters in one line
         RCLCPP_INFO(
             get_logger(),
-            "Parameters: lidar_frame='%s', camera_frame='%s', min_depth=%.2f, max_depth=%.2f",
+            "Parameters: lidar_frame='%s', camera_frame='%s', min_range=%.2f, max_range=%.2f",
             lidar_frame_.c_str(),
             camera_frame_.c_str(),
-            min_depth_,
-            max_depth_
+            min_range_,
+            max_range_
         );             
     }
 
@@ -129,8 +129,8 @@ private:
         // Apply CropBox filter
         pcl::CropBox<pcl::PointXYZ> box_filter;
         box_filter.setInputCloud(cloud);
-        box_filter.setMin(Eigen::Vector4f(min_depth_, -max_depth_, -max_depth_, 1.0f));
-        box_filter.setMax(Eigen::Vector4f(max_depth_, max_depth_, max_depth_, 1.0f));
+        box_filter.setMin(Eigen::Vector4f(min_range_, -max_range_, -max_range_, 1.0f));
+        box_filter.setMax(Eigen::Vector4f(max_range_, max_range_, max_range_, 1.0f));
         box_filter.filter(*cloud);
 
         // Convert the timestamp to rclcpp::Time
@@ -259,7 +259,7 @@ private:
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
     image_geometry::PinholeCameraModel camera_model_;
-    float min_depth_, max_depth_;
+    float min_range_, max_range_;
     std::string camera_frame_, lidar_frame_;
     int image_width_, image_height_;
 
