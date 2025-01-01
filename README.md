@@ -94,9 +94,9 @@ git clone https://github.com/YourUsername/ros2_lidar_camera_fusion.git
 
 ## 🚀 Usage
 
-### 1. Configure Launch File Parameters
+Modify the launch file `launch/lidar_camera_fusion_yolo.launch.py.yaml`:
 
-Modify `launch/lidar_camera_fusion_yolo.launch.py.yaml`:
+### 1. Configure Launch File Parameters
 
 ```yaml
 parameters=[
