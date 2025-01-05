@@ -86,11 +86,36 @@ Ensure you have the following installed:
 
 ### Installation Steps
 
+#### Clone the package:
+
 ```bash
 # Clone the repository
 cd ~/ros2_ws/src
 git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection_cpp.git
 ```
+
+#### Install ROS 2 Dependencies
+
+```bash
+sudo apt update
+sudo apt install ros-humble-cv-bridge \
+                 ros-humble-image-geometry \
+                 ros-humble-vision-opencv \
+                 ros-humble-message-filters \
+                 ros-humble-tf2-ros \
+                 ros-humble-tf2-geometry-msgs \
+                 ros-humble-tf2-eigen \
+                 ros-humble-pcl-conversions \
+                 ros-humble-pcl-ros
+```
+
+#### Install PCL and OpenCV Dependencies
+```bash
+sudo apt update
+sudo apt install libpcl-dev libopencv-dev
+```
+
+
 
 ## 🚀 Usage
 
