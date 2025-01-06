@@ -106,7 +106,9 @@ sudo apt install ros-humble-cv-bridge \
                  ros-humble-tf2-geometry-msgs \
                  ros-humble-tf2-eigen \
                  ros-humble-pcl-conversions \
-                 ros-humble-pcl-ros
+                 ros-humble-pcl-ros \
+                 ros-humble-pcl-conversions ros-humble-pcl-ros
+
 ```
 
 #### Install PCL and OpenCV Dependencies
