@@ -107,6 +107,10 @@ sudo apt install ros-humble-cv-bridge \
                  ros-humble-tf2-eigen \
                  ros-humble-pcl-conversions \
                  ros-humble-pcl-ros \
+                 ros-humble-rclcpp \
+                 ros-humble-sensor-msgs \
+                 ros-humble-geometry-msgs \
+                 ros-humble-vision-msgs \
                  ros-humble-pcl-conversions ros-humble-pcl-ros
 
 ```
