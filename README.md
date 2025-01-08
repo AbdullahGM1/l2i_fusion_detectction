@@ -80,7 +80,7 @@ Publishing Points Within Detected Object Bounding Boxes:
 Ensure you have the following installed:
 
 - **ROS2 Humble** ([Installation Guide](https://docs.ros.org/en/humble/Installation.html))
-- **YOLO ROS** ([Setup Instructions](https://github.com/mgonzs13/yolov8_ros))
+- **YOLO ROS** ([Setup Instructions]([https://github.com/mgonzs13/yolov8_ros](https://github.com/AbdullahGM1/yolo_ros)))
 - **C++ Compiler**: GCC 8+
 - **Required Libraries**: PCL, OpenCV, and ROS2 dependencies
 
