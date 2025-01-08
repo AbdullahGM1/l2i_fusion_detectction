@@ -1,7 +1,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/msg/image.hpp>
-#include <yolov8_msgs/msg/detection_array.hpp>
+#include <yolo_msgs/msg/detection_array.hpp>
 #include <geometry_msgs/msg/pose_array.hpp>
 #include <image_geometry/pinhole_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
@@ -76,7 +76,7 @@ private:
 
         // Synchronizer
         using SyncPolicy = message_filters::sync_policies::ApproximateTime<
-            sensor_msgs::msg::PointCloud2, sensor_msgs::msg::Image, yolov8_msgs::msg::DetectionArray>;
+            sensor_msgs::msg::PointCloud2, sensor_msgs::msg::Image, yolo_msgs::msg::DetectionArray>;
         sync_ = std::make_shared<message_filters::Synchronizer<SyncPolicy>>(SyncPolicy(10), point_cloud_sub_, image_sub_, detection_sub_);
         sync_->registerCallback(std::bind(&LidarCameraFusionNode::sync_callback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
@@ -95,7 +95,7 @@ private:
 
     void sync_callback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr& point_cloud_msg,
                        const sensor_msgs::msg::Image::ConstSharedPtr& image_msg,
-                       const yolov8_msgs::msg::DetectionArray::ConstSharedPtr& detection_msg)
+                       const yolo_msgs::msg::DetectionArray::ConstSharedPtr& detection_msg)
     {
         // Process point cloud
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_camera_frame = processPointCloud(point_cloud_msg);
@@ -147,7 +147,7 @@ private:
         return cloud;
     }
 
-    std::vector<BoundingBox> processDetections(const yolov8_msgs::msg::DetectionArray::ConstSharedPtr& detection_msg)
+    std::vector<BoundingBox> processDetections(const yolo_msgs::msg::DetectionArray::ConstSharedPtr& detection_msg)
     {
         std::vector<BoundingBox> bounding_boxes;
         for (const auto& detection : detection_msg->detections) {
@@ -266,11 +266,11 @@ private:
     // Subscribers
     message_filters::Subscriber<sensor_msgs::msg::PointCloud2> point_cloud_sub_;
     message_filters::Subscriber<sensor_msgs::msg::Image> image_sub_;
-    message_filters::Subscriber<yolov8_msgs::msg::DetectionArray> detection_sub_;
+    message_filters::Subscriber<yolo_msgs::msg::DetectionArray> detection_sub_;
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
 
     // Synchronizer
-    std::shared_ptr<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::PointCloud2, sensor_msgs::msg::Image, yolov8_msgs::msg::DetectionArray>>> sync_;
+    std::shared_ptr<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::msg::PointCloud2, sensor_msgs::msg::Image, yolo_msgs::msg::DetectionArray>>> sync_;
 
     // Publishers
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;

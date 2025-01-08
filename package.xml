@@ -23,7 +23,7 @@
   <depend>cv_bridge</depend>
   <depend>image_geometry</depend>
   <depend>opencv</depend>
-  <depend>yolov8_msgs</depend>
+  <depend>yolo_msgs</depend>
   <depend>message_filters</depend>
 
   <!-- Export section -->

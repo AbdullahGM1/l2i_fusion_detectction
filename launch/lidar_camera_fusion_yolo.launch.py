@@ -24,10 +24,10 @@ def generate_launch_description():
         ]
     )
 
-    yolov8_launch = IncludeLaunchDescription(
+    yolo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             PathJoinSubstitution([
-                FindPackageShare('yolov8_bringup'),
+                FindPackageShare('yolo_bringup'),
                 'launch/yolov11.launch.py'
             ])
         ]),
@@ -42,5 +42,5 @@ def generate_launch_description():
 
     return LaunchDescription([
         lidar_camera_fusion_node,
-        yolov8_launch
+        yolo_launch
     ])

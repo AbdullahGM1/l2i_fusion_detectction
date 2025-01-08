@@ -21,7 +21,7 @@ find_package(cv_bridge REQUIRED)
 find_package(image_geometry REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(yolov8_msgs REQUIRED)
+find_package(yolo_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 
 # Include directories
@@ -48,7 +48,7 @@ ament_target_dependencies(lidar_camera_fusion_with_detection
   cv_bridge
   image_geometry
   OpenCV
-  yolov8_msgs
+  yolo_msgs
   message_filters
 )
 
