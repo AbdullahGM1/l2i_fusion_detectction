@@ -91,7 +91,7 @@ Ensure you have the following installed:
 ```bash
 # Clone the repository
 cd ~/ros2_ws/src
-git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection_cpp.git
+https://github.com/AbdullahGM1/l2i_fusion_detectction.git
 ```
 
 #### Install ROS 2 Dependencies
