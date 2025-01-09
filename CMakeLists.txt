@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ros2_lidar_camera_fusion_with_detection_cpp)
+project(l2i_fusion_detectction)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)

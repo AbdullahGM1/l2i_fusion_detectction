@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>ros2_lidar_camera_fusion_with_detection_cpp</name>
+  <name>l2i_fusion_detectction</name>
   <version>1.0.0</version>
   <description>A ROS2 package for lidar and camera fusion with detection, using C++.</description>
 
