@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='x500_camera_lidar'>
+    <include merge='true'>
+      <uri>model://x500</uri>
+    </include>
+    <!-- <include merge='true'>
+      <uri>model://RealSense_D435</uri>
+      <pose>.15 0 .25 0 0 1.5707</pose>
+    </include>
+    <joint name="CameraJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>link</child>
+      <pose relative_to="base_link">.17 0 .25 0 0 1.5707</pose>
+    </joint> -->
+
+    <!--Lidar-->
+    <include merge='true'>
+      <uri>model://lidar</uri>
+      <!-- <pose>0.1 0 0.9055 0 1.0 3.1400000000000001</pose> -->
+      <pose degrees="true">0.0 0.0 0.32 0 0 0</pose>
+
+    </include>
+    <joint name="LidarJoint" type="fixed">
+      <parent>base_link</parent>
+      <child>lidar_link</child>
+      <!-- <pose relative_to="base_link_gimbal">0.0 0.0 .25 0 0 0</pose> -->
+    </joint>
+
+      <include merge='true'>
+        <uri>model://gimbal_small_3d</uri>
+        <pose relative_to="base_link" degrees="true">0.14 0 -0.10 90 0 90</pose>
+      </include>
+      <joint name="gimbal_joint" type="fixed">
+        <parent>base_link</parent>
+        <child>base_link_gimbal</child>
+        <!-- <pose relative_to="base_link">0 0 0.5 1.57 0 0</pose> -->
+        <axis>
+          <dynamics>
+            <damping>0.5</damping>
+          </dynamics>
+          <limit>
+            <lower>0</lower>
+            <upper>0</upper>
+          </limit>
+          <xyz>0 0 1</xyz>
+        </axis>
+      </joint>
+
+
+    <!-- <plugin name='gz::sim::systems::Sensors' filename='gz-sim-sensors-system'>
+      <render_engine>ogre2</render_engine>
+    </plugin> -->
+
+  </model>
+</sdf>

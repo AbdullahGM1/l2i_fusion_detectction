@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<sdf version='1.6'>
+  <model name='lidar'>
+    <pose>0.0 0.0 2.0 0 0 3.1400000000000001</pose>
+    <link name='lidar_link'>
+      <pose>0.010000000000000003 0.010000000000000003 0.010000000000000003 0 0 0</pose>
+      <inertial>
+        <mass>0.10000000000000001</mass>
+        <inertia>
+          <ixx>0.00016666700000000001</ixx>
+          <iyy>0.00016666700000000001</iyy>
+          <izz>0.00016666700000000001</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+        <pose>0 0 0 0 0 0</pose>
+      </inertial>
+      <collision name='collision'>
+        <geometry>
+          <box>
+            <size>0.030000000000000001 0.030000000000000001 0.030000000000000001</size>
+          </box>
+        </geometry>
+        <surface>
+          <friction>
+            <ode/>
+          </friction>
+          <bounce/>
+          <contact/>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <box>
+            <size>0.030000000000000001 0.030000000000000001 0.030000000000000001</size>
+          </box>
+        </geometry>
+      </visual>
+      <sensor name="gpu_lidar" type="gpu_lidar">
+        <!-- The sensor pose relative to the link it’s attached to -->
+        <pose>0 0 0 0 0 0</pose>
+        <!-- Topic name -->
+        <topic>scan</topic>
+        <!-- Update rate: Ouster often operates around 10Hz -->
+        <update_rate>10</update_rate>
+        <!-- GPU LIDAR parameters -->
+        <lidar>
+          <scan>
+            <!-- <horizontal>
+              <samples>2048</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>64</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.392699</min_angle>
+              <max_angle>0.392699</max_angle>
+            </vertical> -->
+            <horizontal>
+              <samples>720</samples> <!-- Change samples to 1 -->
+              <resolution>0.01</resolution>
+              <min_angle>-3.14159</min_angle> <!-- Set min and max angle to 0 -->
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>50</samples> <!-- Change samples to 1 -->
+              <min_angle>-0.122173</min_angle> <!-- Set min and max angle to 0 -->
+              <max_angle>0.907571</max_angle>
+              <resolution>0.01</resolution>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.1</min>    <!-- Minimum range -->
+            <max>250.0</max>  <!-- Similar to Ouster max range -->
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>none</type>
+          </noise>
+        </lidar>
+      </sensor>
+
+
+      <enable_wind>false</enable_wind>
+    </link>
+    <!-- <static>true</static> -->
+    <self_collide>false</self_collide>
+  </model>
+</sdf>
