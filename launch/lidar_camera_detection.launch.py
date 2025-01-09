@@ -16,7 +16,6 @@ def generate_launch_description():
 
     # Node for Drone 1
     world = {'gz_world': 'default'}
-    # world = {'gz_world': 'ihunter_world'}
     model_name = {'gz_model_name': 'x500_camera_lidar'}
     autostart_id = {'px4_autostart_id': '4022'}
     instance_id = {'instance_id': '1'}
@@ -170,7 +169,7 @@ def generate_launch_description():
             ])
         ]),
         launch_arguments={
-            'model': '/home/user/shared_volume/ros2_ws/src/ros2_lidar_camera_fusion_with_detection_cpp/config/rgb.pt',
+            'model': '/home/user/shared_volume/ros2_ws/src/l2i_fusion_detection/config/rgb.pt',
             'threshold': '0.5',
             'input_image_topic': '/interceptor/gimbal_camera',
             'namespace': 'rgb',
