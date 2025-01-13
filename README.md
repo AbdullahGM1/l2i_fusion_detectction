@@ -166,7 +166,7 @@ colcon build --packages-select l2i_fusion_detection
 source install/setup.bash
 
 # Launch the node
-ros2 launch l2i_fusion_detection lidar_camera_fusion_yolo.launch.py
+ros2 launch l2i_fusion_detection lidar_fusion_detection.launch.py
 ```
 
 > **Note:** In Rviz2 go to `file` -> `Open Config` and open `l2i.rviz` file to load the Rviz2 config
