@@ -58,8 +58,8 @@ Publishing Points Within Detected Object Bounding Boxes:
 
 #### Subscribed Topics
 - `/scan/points` ([sensor_msgs/msg/PointCloud2]) - Lidar point cloud data
-- `/interceptor/gimbal_camera` ([sensor_msgs/msg/Image]) - Camera feed
-- `/interceptor/gimbal_camera_info` ([sensor_msgs/msg/CameraInfo]) - Camera calibration
+- `/observer/gimbal_camera` ([sensor_msgs/msg/Image]) - Camera feed
+- `/observer/gimbal_camera_info` ([sensor_msgs/msg/CameraInfo]) - Camera calibration
 - `/rgb/tracking` ([yolov8_msgs/msg/DetectionArray]) - Object detection output
 
 #### Published Topics
@@ -69,7 +69,7 @@ Publishing Points Within Detected Object Bounding Boxes:
 
 ### Parameters
 - `lidar_frame` (string, default: "x500_mono_1/lidar_link/gpu_lidar")
-- `camera_frame` (string, default: "interceptor/gimbal_camera")
+- `camera_frame` (string, default: "observer/gimbal_camera")
 - `min_depth` (float, default: 0.2)
 - `max_depth` (float, default: 10.0)
 
@@ -80,7 +80,7 @@ Publishing Points Within Detected Object Bounding Boxes:
 Ensure you have the following installed:
 
 - **ROS2 Humble** ([Installation Guide](https://docs.ros.org/en/humble/Installation.html))
-- **YOLO ROS** ([Setup Instructions](https://github.com/mgonzs13/yolov8_ros))
+- **YOLO ROS** ([Setup Instructions](https://github.com/AbdullahGM1/yolo_ros))
 - **C++ Compiler**: GCC 8+
 - **Required Libraries**: PCL, OpenCV, and ROS2 dependencies
 
@@ -91,7 +91,7 @@ Ensure you have the following installed:
 ```bash
 # Clone the repository
 cd ~/ros2_ws/src
-git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection_cpp.git
+git clone https://github.com/AbdullahGM1/l2i_fusion_detection.git
 ```
 
 #### Install ROS 2 Dependencies
@@ -133,7 +133,7 @@ Modify the launch file `launch/lidar_camera_fusion_yolo.launch.py.yaml`:
 parameters=[
             {'min_range': 0.2, 'max_range': 10.0, # Setup your min and max range, where (x-axis) is the depth
              'lidar_frame': 'x500_mono_1/lidar_link/gpu_lidar', # Default Source frame
-             'camera_frame': 'interceptor/gimbal_camera'}  # Default Target frame
+             'camera_frame': 'observer/gimbal_camera'}  # Default Target frame
 ```
 
 ### 2. Configure Topic Remapping
@@ -142,17 +142,17 @@ parameters=[
 remappings=[
             # Replace with actual topic names
             ('/scan/points', '/scan/points'), # The lidar point cloud topic - replace the second topic to your topic
-            ('/interceptor/gimbal_camera_info', '/interceptor/gimbal_camera_info'), # The camera info topic - replace the second topic to your topic
-            ('/interceptor/gimbal_camera', '/interceptor/gimbal_camera'), # The camera image topic - replace the second topic to your topic
+            ('/observer/gimbal_camera_info', '/observer/gimbal_camera_info'), # The camera info topic - replace the second topic to your topic
+            ('/observer/gimbal_camera', '/observer/gimbal_camera'), # The camera image topic - replace the second topic to your topic
             ('/rgb/tracking', '/rgb/tracking') # The YOLO BB tracking topic - replace the second topic to your topic
 ```
 
 ### 3. Configure YOLO Settings
 
 ```yaml
-model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/test01.pt', # Add your Yolov11 Model
+model': '/home/user/shared_volume/ros2_ws/src/l2i_fusion_detection/config/rgb.pt', # Add your Yolov11 Model
             'threshold': '0.5', # Set the threshold for your detection
-            'input_image_topic': '/interceptor/gimbal_camera', # Add your in image input topic
+            'input_image_topic': '/observer/gimbal_camera', # Add your in image input topic
             'namespace': 'rgb',  
             'device': 'cuda:0'
 ```
@@ -162,11 +162,11 @@ model': '/home/user/shared_volume/ros2_ws/src/d2dtracker_drone_detector/config/t
 ```bash
 # Build the package
 cd ~/ros2_ws
-colcon build --packages-select ros2_lidar_camera_fusion_with_detection_cpp
+colcon build --packages-select l2i_fusion_detection
 source install/setup.bash
 
 # Launch the node
-ros2 launch ros2_lidar_camera_fusion_with_detection_cpp lidar_camera_fusion_yolo.launch.py
+ros2 launch l2i_fusion_detection lidar_camera_fusion_yolo.launch.py
 ```
 
 ### ⚠️ Important Note
