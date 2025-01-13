@@ -125,7 +125,7 @@ sudo apt install libpcl-dev libopencv-dev
 
 ## 🚀 Usage
 
-Modify the launch file `launch/lidar_camera_fusion_yolo.launch.py.yaml`:
+Modify the launch file `launch/lidar_fusion_detection.launch.py`:
 
 ### 1. Configure Launch File Parameters
 
@@ -169,10 +169,19 @@ source install/setup.bash
 ros2 launch l2i_fusion_detection lidar_fusion_detection.launch.py
 ```
 
-> **Note:** In Rviz2 go to `file` -> `Open Config` and open `l2i.rviz` file to load the Rviz2 config
-
-### ⚠️ Important Note
-Make sure to publish the static transform for your lidar and camera frames before running the node. This is crucial for proper coordinate frame transformation.
+> ### ⚠️ Important Notes
+* Make sure to publish the static transform `/tf_static` for your lidar and camera frames before running the node. This is crucial for proper coordinate frame transformation.
+* If you want to run the package with simulation, you need to follow the steps in the following repo [SMART-Track-sim-setup.](https://github.com/AbdullahGM1/SMART-Track-sim-setup./tree/main)
+* If you want to run just the `lidar_camera_fusion_with_detection.cpp` node without the simulation, you need to comment these parts in the launch file:
+```py
+    # ld.add_action(gz_launch)
+    # ld.add_action(map2pose_tf_node)
+    # ld.add_action(cam_tf_node)
+    # ld.add_action(lidar_tf_node)
+    # ld.add_action(ros_gz_bridge)
+    # ld.add_action(mavros_launch)
+    # ld.add_action(rviz_node)
+```
 
 ## 🔍 Technical Details
 
