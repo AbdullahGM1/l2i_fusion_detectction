@@ -25,6 +25,8 @@
   <depend>opencv</depend>
   <depend>yolo_msgs</depend>
   <depend>message_filters</depend>
+  <depend>pcl_ros</depend>
+
 
   <!-- Export section -->
   <export>

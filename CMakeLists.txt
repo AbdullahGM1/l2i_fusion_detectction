@@ -23,12 +23,16 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(yolo_msgs REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(PCL REQUIRED)
+
 
 # Include directories
 include_directories(
   include
   ${OpenCV_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+
 )
 
 # Declare the executable
@@ -56,6 +60,7 @@ ament_target_dependencies(lidar_camera_fusion_with_detection
 target_link_libraries(lidar_camera_fusion_with_detection
   ${OpenCV_LIBRARIES}
   ${Eigen3_LIBRARIES}
+  ${PCL_LIBRARIES}
 )
 
 # Install the executable
