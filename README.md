@@ -169,6 +169,8 @@ source install/setup.bash
 ros2 launch l2i_fusion_detection lidar_camera_fusion_yolo.launch.py
 ```
 
+> **Note:** In Rviz2 go to `file` -> `Open Config` and open `l2i.rviz` file to load the Rviz2 config
+
 ### ⚠️ Important Note
 Make sure to publish the static transform for your lidar and camera frames before running the node. This is crucial for proper coordinate frame transformation.
 
