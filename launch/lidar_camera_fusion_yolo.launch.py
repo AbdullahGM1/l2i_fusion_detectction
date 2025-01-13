@@ -136,7 +136,7 @@ def generate_launch_description():
         executable='rviz2',
         output='screen',
         name='sim_rviz2',
-        arguments=['-d' + os.path.join(get_package_share_directory('l2i_fusion_detection'), 'l2i.rviz')]
+        arguments=['-d', '/home/user/shared_volume/ros2_ws/src/l2i_fusion_detection/l2i.rviz']
     )
 
     # Lidar-Camera Fusion Node
