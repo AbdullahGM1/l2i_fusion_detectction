@@ -80,7 +80,7 @@ Publishing Points Within Detected Object Bounding Boxes:
 Ensure you have the following installed:
 
 - **ROS2 Humble** ([Installation Guide](https://docs.ros.org/en/humble/Installation.html))
-- **YOLO ROS** [Setup Instructions](https://github.com/AbdullahGM1/yolo_ros)
+- **YOLO ROS** ([Setup Instructions](https://github.com/mgonzs13/yolov8_ros))
 - **C++ Compiler**: GCC 8+
 - **Required Libraries**: PCL, OpenCV, and ROS2 dependencies
 
@@ -91,7 +91,7 @@ Ensure you have the following installed:
 ```bash
 # Clone the repository
 cd ~/ros2_ws/src
-https://github.com/AbdullahGM1/l2i_fusion_detectction.git
+git clone https://github.com/AbdullahGM1/ros2_lidar_camera_fusion_with_detection_cpp.git
 ```
 
 #### Install ROS 2 Dependencies
