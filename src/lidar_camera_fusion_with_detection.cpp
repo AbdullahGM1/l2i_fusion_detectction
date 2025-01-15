@@ -134,7 +134,7 @@ private:
         rclcpp::Time cloud_time(point_cloud_msg->header.stamp);
         if (tf_buffer_.canTransform(camera_frame_, cloud->header.frame_id, cloud_time, tf2::durationFromSec(1.0))) {
             geometry_msgs::msg::TransformStamped transform = tf_buffer_.lookupTransform(camera_frame_, cloud->header.frame_id, cloud_time, tf2::durationFromSec(1.0));
-            Eigen::Affine3d eigen_transform = tf2::transformToEigen(transform);
+            Eigen::Affine3d eigen_transform = tf2::transformToEigen(transform); // Eigen::Affine3d - which is a 4x4 transformation matrix
             pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
             pcl::transformPointCloud(*cloud, *transformed_cloud, eigen_transform);
             return transformed_cloud;
