@@ -170,28 +170,6 @@ private:
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_camera_frame,
         std::vector<BoundingBox>& bounding_boxes)
     {
-        const int grid_size = 100;  // Size of the grid for spatial hashing
-        const int grid_width = image_width_ / grid_size;
-        const int grid_height = image_height_ / grid_size;
-        std::vector<std::vector<BoundingBox*>> grid(grid_width * grid_height);  // Grid for spatial hashing
-
-        // Populate the grid with bounding boxes
-        for (auto& bbox : bounding_boxes) {
-            if (!bbox.valid) continue;
-
-            int x_min_grid = static_cast<int>(bbox.x_min / grid_size);
-            int x_max_grid = static_cast<int>(bbox.x_max / grid_size);
-            int y_min_grid = static_cast<int>(bbox.y_min / grid_size);
-            int y_max_grid = static_cast<int>(bbox.y_max / grid_size);
-
-            for (int x = x_min_grid; x <= x_max_grid; ++x) {
-                for (int y = y_min_grid; y <= y_max_grid; ++y) {
-                    if (x < 0 || x >= grid_width || y < 0 || y >= grid_height) continue;
-                    grid[y * grid_width + x].push_back(&bbox);  // Add bounding box to grid cells
-                }
-            }
-        }
-
         std::vector<cv::Point2d> projected_points;
 
         // Project each 3D point to 2D image space
@@ -203,22 +181,17 @@ private:
             uv.y = image_height_ - uv.y;  // Adjust for image coordinate system
             uv.x = image_width_ - uv.x;
 
-            // Find the grid cell for the projected point
-            int grid_x = static_cast<int>(uv.x / grid_size);
-            int grid_y = static_cast<int>(uv.y / grid_size);
-
-            if (grid_x >= 0 && grid_x < grid_width && grid_y >= 0 && grid_y < grid_height) {
-                // Check bounding boxes in the grid cell
-                for (auto bbox_ptr : grid[grid_y * grid_width + grid_x]) {
-                    if (uv.x >= bbox_ptr->x_min && uv.x <= bbox_ptr->x_max &&
-                        uv.y >= bbox_ptr->y_min && uv.y <= bbox_ptr->y_max) {
-                        projected_points.push_back(uv);  // Add projected point to results
-                        bbox_ptr->sum_x += point.x;  // Accumulate point coordinates
-                        bbox_ptr->sum_y += point.y;
-                        bbox_ptr->sum_z += point.z;
-                        bbox_ptr->count++;  // Increment point count
-                        bbox_ptr->object_cloud->points.push_back(point);  // Add point to object cloud
-                    }
+            // Check if the point lies within any bounding box
+            for (auto& bbox : bounding_boxes) {
+                if (uv.x >= bbox.x_min && uv.x <= bbox.x_max &&
+                    uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
+                    projected_points.push_back(uv);  // Add projected point to results
+                    bbox.sum_x += point.x;  // Accumulate point coordinates
+                    bbox.sum_y += point.y;
+                    bbox.sum_z += point.z;
+                    bbox.count++;  // Increment point count
+                    bbox.object_cloud->points.push_back(point);  // Add point to object cloud
+                    break;  // Early exit: skip remaining bounding boxes for this point
                 }
             }
         }
