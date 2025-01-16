@@ -19,6 +19,10 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <thread>
+#include <vector>
+#include <mutex>
+
 
 class LidarCameraFusionNode : public rclcpp::Node
 {
@@ -171,33 +175,65 @@ private:
         std::vector<BoundingBox>& bounding_boxes)
     {
         std::vector<cv::Point2d> projected_points;
+        std::mutex mtx;  // Mutex for thread-safe updates
 
-        // Project each 3D point to 2D image space
-        for (const auto& point : cloud_camera_frame->points) {
-            if (point.z <= 0) continue;  // Skip points behind the camera
+        // Precompute image adjustments
+        const int image_width = image_width_;
+        const int image_height = image_height_;
 
-            cv::Point3d pt_cv(point.x, point.y, point.z);
-            cv::Point2d uv = camera_model_.project3dToPixel(pt_cv);  // Project 3D point to 2D
-            uv.y = image_height_ - uv.y;  // Adjust for image coordinate system
-            uv.x = image_width_ - uv.x;
+        // Function to process a subset of points
+        auto process_points = [&](size_t start, size_t end) {
+            for (size_t i = start; i < end; ++i) {
+                const auto& point = cloud_camera_frame->points[i];
 
-            // Check if the point lies within any bounding box
-            for (auto& bbox : bounding_boxes) {
-                if (uv.x >= bbox.x_min && uv.x <= bbox.x_max &&
-                    uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
-                    projected_points.push_back(uv);  // Add projected point to results
-                    bbox.sum_x += point.x;  // Accumulate point coordinates
-                    bbox.sum_y += point.y;
-                    bbox.sum_z += point.z;
-                    bbox.count++;  // Increment point count
-                    bbox.object_cloud->points.push_back(point);  // Add point to object cloud
-                    break;  // Early exit: skip remaining bounding boxes for this point
+                // Skip points behind the camera (z <= 0)
+                if (point.z <= 0) continue;
+
+                // Project the 3D point into 2D image space
+                cv::Point3d pt_cv(point.x, point.y, point.z);  // 3D point in camera frame (meters)
+                cv::Point2d uv = camera_model_.project3dToPixel(pt_cv);  // Project to 2D (pixels)
+
+                // Adjust for image coordinate system (if needed)
+                uv.y = image_height - uv.y;  // Flip y-axis if origin is at bottom-left
+                uv.x = image_width - uv.x;   // Flip x-axis if needed
+
+                // Check if the projected point lies within any bounding box
+                for (auto& bbox : bounding_boxes) {
+                    if (uv.x >= bbox.x_min && uv.x <= bbox.x_max &&
+                        uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
+                        // Point lies within the bounding box
+                        std::lock_guard<std::mutex> lock(mtx);  // Ensure thread-safe updates
+                        projected_points.push_back(uv);  // Add projected point to results
+                        bbox.sum_x += point.x;  // Accumulate point coordinates (in meters)
+                        bbox.sum_y += point.y;
+                        bbox.sum_z += point.z;
+                        bbox.count++;  // Increment point count
+                        bbox.object_cloud->points.push_back(point);  // Add point to object cloud
+                        break;  // Early exit: skip remaining bounding boxes for this point
+                    }
                 }
             }
+        };
+
+        // Split the work across multiple threads
+        const size_t num_threads = std::thread::hardware_concurrency();
+        const size_t points_per_thread = cloud_camera_frame->points.size() / num_threads;
+        std::vector<std::thread> threads;
+
+        for (size_t t = 0; t < num_threads; ++t) {
+            size_t start = t * points_per_thread;
+            size_t end = (t == num_threads - 1) ? cloud_camera_frame->points.size() : start + points_per_thread;
+            threads.emplace_back(process_points, start, end);
+        }
+
+        // Wait for all threads to finish
+        for (auto& thread : threads) {
+            thread.join();
         }
 
         return projected_points;
     }
+
 
     // Calculate object poses in the lidar frame
     geometry_msgs::msg::PoseArray calculateObjectPoses(
