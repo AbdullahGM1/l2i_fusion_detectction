@@ -244,29 +244,39 @@ private:
         pose_array.header.stamp = cloud_time;
         pose_array.header.frame_id = lidar_frame_;
 
-        // Calculate average position for each bounding box and transform to lidar frame
+        // Look up the transformation from camera to LiDAR frame
+        geometry_msgs::msg::TransformStamped transform;
+        try {
+            transform = tf_buffer_.lookupTransform(lidar_frame_, camera_frame_, cloud_time, tf2::durationFromSec(1.0));
+        } catch (tf2::TransformException& ex) {
+            RCLCPP_ERROR(get_logger(), "Failed to lookup transform: %s", ex.what());
+            return pose_array;  // Return empty PoseArray if transformation fails
+        }
+
+        // Convert the transform to Eigen for faster computation
+        Eigen::Affine3d eigen_transform = tf2::transformToEigen(transform);
+
+        // Calculate average position for each bounding box and transform to LiDAR frame
         for (const auto& bbox : bounding_boxes) {
             if (bbox.count > 0) {
                 double avg_x = bbox.sum_x / bbox.count;
                 double avg_y = bbox.sum_y / bbox.count;
                 double avg_z = bbox.sum_z / bbox.count;
 
-                geometry_msgs::msg::PoseStamped pose_camera;
-                pose_camera.header.stamp = cloud_time;
-                pose_camera.header.frame_id = camera_frame_;
-                pose_camera.pose.position.x = avg_x;
-                pose_camera.pose.position.y = avg_y;
-                pose_camera.pose.position.z = avg_z;
-                pose_camera.pose.orientation.w = 1.0;
+                // Create pose in camera frame
+                Eigen::Vector3d point_camera(avg_x, avg_y, avg_z);
+                Eigen::Vector3d point_lidar = eigen_transform * point_camera;
 
-                try {
-                    geometry_msgs::msg::PoseStamped pose_lidar = tf_buffer_.transform(pose_camera, lidar_frame_, tf2::durationFromSec(1.0));
-                    pose_array.poses.push_back(pose_lidar.pose);  // Add transformed pose to results
-                } catch (tf2::TransformException& ex) {
-                    RCLCPP_ERROR(get_logger(), "Failed to transform pose: %s", ex.what());
-                }
+                // Convert to geometry_msgs::msg::Pose
+                geometry_msgs::msg::Pose pose_lidar;
+                pose_lidar.position.x = point_lidar.x();
+                pose_lidar.position.y = point_lidar.y();
+                pose_lidar.position.z = point_lidar.z();
+                pose_lidar.orientation.w = 1.0;
+                pose_array.poses.push_back(pose_lidar);
             }
         }
+
         return pose_array;
     }
 
