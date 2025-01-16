@@ -50,7 +50,7 @@ private:
     // Declare and load parameters from the parameter server
     void declare_parameters()
     {
-        declare_parameter<std::string>("lidar_frame", "x500_mono_1/lidar_link/gpu_lidar");
+        declare_parameter<std::string>("lidar_frame", "x500_lidar_camera_1/lidar_link/gpu_lidar");
         declare_parameter<std::string>("camera_frame", "observer/gimbal_camera");
         declare_parameter<float>("min_range", 0.2);
         declare_parameter<float>("max_range", 10.0);
