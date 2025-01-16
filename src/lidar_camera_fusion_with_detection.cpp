@@ -99,6 +99,10 @@ private:
     {
         // Process point cloud
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_camera_frame = processPointCloud(point_cloud_msg);
+        if (!cloud_camera_frame) {
+           RCLCPP_ERROR(get_logger(), "Failed to process point cloud. Exiting callback.");
+            return;
+        }
 
         // Process detections
         std::vector<BoundingBox> bounding_boxes = processDetections(detection_msg);
@@ -137,14 +141,22 @@ private:
         rclcpp::Time cloud_time(point_cloud_msg->header.stamp);
 
         // Transform point cloud into camera frame
+         if (cloud->empty()) {
+            RCLCPP_WARN(get_logger(), "Point cloud is empty after filtering, skipping transform.");
+            return cloud;
+        }
+
         if (tf_buffer_.canTransform(camera_frame_, cloud->header.frame_id, cloud_time, tf2::durationFromSec(1.0))) {
             pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
             geometry_msgs::msg::TransformStamped transform = tf_buffer_.lookupTransform(camera_frame_, cloud->header.frame_id, cloud_time, tf2::durationFromSec(1.0));
             Eigen::Affine3d eigen_transform = tf2::transformToEigen(transform);
             pcl::transformPointCloud(*cloud, *transformed_cloud, eigen_transform);
             return transformed_cloud;
+        } else {
+            RCLCPP_ERROR(get_logger(), "Could not transform point cloud from %s to %s", cloud->header.frame_id.c_str(), camera_frame_.c_str());
+            return nullptr;
         }
-        return cloud;
+
     }
 
     std::vector<BoundingBox> processDetections(const yolo_msgs::msg::DetectionArray::ConstSharedPtr& detection_msg)
@@ -173,6 +185,11 @@ private:
                                                                         std::vector<BoundingBox>& bounding_boxes)
     {
         std::vector<cv::Point2d> projected_points;
+        if (!cloud_camera_frame){
+            RCLCPP_WARN(get_logger(), "The cloud is invalid in projectPointsAndAssociateWithBoundingBoxes. Skipping the projection.");
+            return projected_points;
+        }
+
         for (const auto& point : cloud_camera_frame->points) {
             if (point.z > 0) {
                 cv::Point3d pt_cv(point.x, point.y, point.z);
@@ -224,6 +241,8 @@ private:
                 } catch (tf2::TransformException& ex) {
                     RCLCPP_ERROR(get_logger(), "Failed to transform pose: %s", ex.what());
                 }
+            } else {
+                 RCLCPP_WARN(get_logger(), "Skipping pose calculation for bbox ID %d, count is 0", bbox.id);
             }
         }
         return pose_array;
