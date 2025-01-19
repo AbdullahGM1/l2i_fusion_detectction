@@ -296,15 +296,21 @@ private:
         // Publish the fused image
         image_publisher_->publish(*cv_ptr->toImageMsg());
 
-        // Publish object point clouds
+        // Combine all object point clouds into a single cloud
+        pcl::PointCloud<pcl::PointXYZ>::Ptr combined_cloud(new pcl::PointCloud<pcl::PointXYZ>);
         for (const auto& bbox : bounding_boxes) {
             if (bbox.count > 0 && bbox.object_cloud) {
-                sensor_msgs::msg::PointCloud2 object_cloud_msg;
-                pcl::toROSMsg(*bbox.object_cloud, object_cloud_msg);
-                object_cloud_msg.header = image_msg->header;
-                object_cloud_msg.header.frame_id = camera_frame_;
-                object_point_cloud_publisher_->publish(object_cloud_msg);
+                *combined_cloud += *bbox.object_cloud;  // Concatenate point clouds
             }
+        }
+
+        // Publish the combined point cloud
+        if (!combined_cloud->empty()) {
+            sensor_msgs::msg::PointCloud2 combined_cloud_msg;
+            pcl::toROSMsg(*combined_cloud, combined_cloud_msg);
+            combined_cloud_msg.header = image_msg->header;
+            combined_cloud_msg.header.frame_id = camera_frame_;
+            object_point_cloud_publisher_->publish(combined_cloud_msg);
         }
 
         // Publish object poses
