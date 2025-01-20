@@ -165,7 +165,10 @@ cd ~/ros2_ws
 colcon build --packages-select l2i_fusion_detection
 source install/setup.bash
 
-# Launch the node
+# Launch the node (simulation)
+ros2 launch l2i_fusion_detection lidar_fusion_detection.launch.py
+
+# Launch the node (real sensor -> provided are the params for interealsense d345iC)
 ros2 launch l2i_fusion_detection lidar_fusion_detection.launch.py
 ```
 

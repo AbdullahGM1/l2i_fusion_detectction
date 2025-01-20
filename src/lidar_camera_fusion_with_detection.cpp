@@ -107,6 +107,10 @@ private:
     {
         // Process point cloud: crop, transform to camera frame
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_camera_frame = processPointCloud(point_cloud_msg);
+        if (!cloud_camera_frame) {
+           RCLCPP_ERROR(get_logger(), "Failed to process point cloud. Exiting callback.");
+            return;
+        }
 
         // Process detections: extract bounding boxes
         std::vector<BoundingBox> bounding_boxes = processDetections(detection_msg);
@@ -136,14 +140,24 @@ private:
 
         // Transform point cloud to camera frame using TF2
         rclcpp::Time cloud_time(point_cloud_msg->header.stamp);
+
+        // Transform point cloud into camera frame
+         if (cloud->empty()) {
+            RCLCPP_WARN(get_logger(), "Point cloud is empty after filtering, skipping transform.");
+            return cloud;
+        }
+
         if (tf_buffer_.canTransform(camera_frame_, cloud->header.frame_id, cloud_time, tf2::durationFromSec(1.0))) {
             geometry_msgs::msg::TransformStamped transform = tf_buffer_.lookupTransform(camera_frame_, cloud->header.frame_id, cloud_time, tf2::durationFromSec(1.0));
             Eigen::Affine3d eigen_transform = tf2::transformToEigen(transform); // Eigen::Affine3d - which is a 4x4 transformation matrix
             pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(new pcl::PointCloud<pcl::PointXYZ>);
             pcl::transformPointCloud(*cloud, *transformed_cloud, eigen_transform);
             return transformed_cloud;
+        } else {
+            RCLCPP_ERROR(get_logger(), "Could not transform point cloud from %s to %s", cloud->header.frame_id.c_str(), camera_frame_.c_str());
+            return nullptr;
         }
-        return cloud;  // Return original cloud if transformation fails
+
     }
 
     // Process detections: extract bounding boxes from YOLO detections
@@ -175,29 +189,18 @@ private:
         std::vector<BoundingBox>& bounding_boxes)
     {
         std::vector<cv::Point2d> projected_points;
-        std::mutex mtx;  // Mutex for thread-safe updates
+        if (!cloud_camera_frame){
+            RCLCPP_WARN(get_logger(), "The cloud is invalid in projectPointsAndAssociateWithBoundingBoxes. Skipping the projection.");
+            return projected_points;
+        }
 
-        // Precompute image adjustments
-        const int image_width = image_width_;
-        const int image_height = image_height_;
+        for (const auto& point : cloud_camera_frame->points) {
+            if (point.z > 0) {
+                cv::Point3d pt_cv(point.x, point.y, point.z);
+                cv::Point2d uv = camera_model_.project3dToPixel(pt_cv);
+                uv.y = image_height_ - uv.y; // Adjust for image coordinate system
+                uv.x = image_width_ - uv.x;
 
-        // Function to process a subset of points
-        auto process_points = [&](size_t start, size_t end) {
-            for (size_t i = start; i < end; ++i) {
-                const auto& point = cloud_camera_frame->points[i];
-
-                // Skip points behind the camera (z <= 0)
-                if (point.z <= 0) continue;
-
-                // Project the 3D point into 2D image space
-                cv::Point3d pt_cv(point.x, point.y, point.z);  // 3D point in camera frame (meters)
-                cv::Point2d uv = camera_model_.project3dToPixel(pt_cv);  // Project to 2D (pixels)
-
-                // Adjust for image coordinate system (if needed)
-                uv.y = image_height - uv.y;  // Flip y-axis if origin is at bottom-left
-                uv.x = image_width - uv.x;   // Flip x-axis if needed
-
-                // Check if the projected point lies within any bounding box
                 for (auto& bbox : bounding_boxes) {
                     if (uv.x >= bbox.x_min && uv.x <= bbox.x_max &&
                         uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
@@ -263,20 +266,26 @@ private:
                 double avg_y = bbox.sum_y / bbox.count;
                 double avg_z = bbox.sum_z / bbox.count;
 
-                // Create pose in camera frame
-                Eigen::Vector3d point_camera(avg_x, avg_y, avg_z);
-                Eigen::Vector3d point_lidar = eigen_transform * point_camera;
+                // Create a Pose in camera frame
+                geometry_msgs::msg::PoseStamped pose_camera;
+                pose_camera.header.stamp = cloud_time;
+                pose_camera.header.frame_id = camera_frame_;
+                pose_camera.pose.position.x = avg_x;
+                pose_camera.pose.position.y = avg_y;
+                pose_camera.pose.position.z = avg_z;
+                pose_camera.pose.orientation.w = 1.0;
 
-                // Convert to geometry_msgs::msg::Pose
-                geometry_msgs::msg::Pose pose_lidar;
-                pose_lidar.position.x = point_lidar.x();
-                pose_lidar.position.y = point_lidar.y();
-                pose_lidar.position.z = point_lidar.z();
-                pose_lidar.orientation.w = 1.0;
-                pose_array.poses.push_back(pose_lidar);
+                // Transform pose to lidar frame
+                try {
+                    geometry_msgs::msg::PoseStamped pose_lidar = tf_buffer_.transform(pose_camera, lidar_frame_, tf2::durationFromSec(1.0));
+                    pose_array.poses.push_back(pose_lidar.pose);
+                } catch (tf2::TransformException& ex) {
+                    RCLCPP_ERROR(get_logger(), "Failed to transform pose: %s", ex.what());
+                }
+            } else {
+                 RCLCPP_WARN(get_logger(), "Skipping pose calculation for bbox ID %d, count is 0", bbox.id);
             }
         }
-
         return pose_array;
     }
 
