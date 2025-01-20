@@ -157,7 +157,6 @@ private:
             RCLCPP_ERROR(get_logger(), "Could not transform point cloud from %s to %s", cloud->header.frame_id.c_str(), camera_frame_.c_str());
             return nullptr;
         }
-
     }
 
     // Process detections: extract bounding boxes from YOLO detections
@@ -194,25 +193,29 @@ private:
             return projected_points;
         }
 
-        for (const auto& point : cloud_camera_frame->points) {
-            if (point.z > 0) {
-                cv::Point3d pt_cv(point.x, point.y, point.z);
-                cv::Point2d uv = camera_model_.project3dToPixel(pt_cv);
-                uv.y = image_height_ - uv.y; // Adjust for image coordinate system
-                uv.x = image_width_ - uv.x;
+        // Lambda function to process points in parallel
+        auto process_points = [&](size_t start, size_t end) {
+            for (size_t i = start; i < end; ++i) {
+                const auto& point = cloud_camera_frame->points[i];
+                if (point.z > 0) {
+                    cv::Point3d pt_cv(point.x, point.y, point.z);
+                    cv::Point2d uv = camera_model_.project3dToPixel(pt_cv);
+                    uv.y = image_height_ - uv.y; // Adjust for image coordinate system
+                    uv.x = image_width_ - uv.x;
 
-                for (auto& bbox : bounding_boxes) {
-                    if (uv.x >= bbox.x_min && uv.x <= bbox.x_max &&
-                        uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
-                        // Point lies within the bounding box
-                        std::lock_guard<std::mutex> lock(mtx);  // Ensure thread-safe updates
-                        projected_points.push_back(uv);  // Add projected point to results
-                        bbox.sum_x += point.x;  // Accumulate point coordinates (in meters)
-                        bbox.sum_y += point.y;
-                        bbox.sum_z += point.z;
-                        bbox.count++;  // Increment point count
-                        bbox.object_cloud->points.push_back(point);  // Add point to object cloud
-                        break;  // Early exit: skip remaining bounding boxes for this point
+                    for (auto& bbox : bounding_boxes) {
+                        if (uv.x >= bbox.x_min && uv.x <= bbox.x_max &&
+                            uv.y >= bbox.y_min && uv.y <= bbox.y_max) {
+                            // Point lies within the bounding box
+                            std::lock_guard<std::mutex> lock(mtx);  // Ensure thread-safe updates
+                            projected_points.push_back(uv);  // Add projected point to results
+                            bbox.sum_x += point.x;  // Accumulate point coordinates (in meters)
+                            bbox.sum_y += point.y;
+                            bbox.sum_z += point.z;
+                            bbox.count++;  // Increment point count
+                            bbox.object_cloud->points.push_back(point);  // Add point to object cloud
+                            break;  // Early exit: skip remaining bounding boxes for this point
+                        }
                     }
                 }
             }
@@ -236,7 +239,6 @@ private:
 
         return projected_points;
     }
-
 
     // Calculate object poses in the lidar frame
     geometry_msgs::msg::PoseArray calculateObjectPoses(
@@ -351,6 +353,9 @@ private:
     rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
     rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_publisher_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr object_point_cloud_publisher_;
+
+    // Mutex for thread-safe updates
+    std::mutex mtx;
 };
 
 int main(int argc, char** argv)
